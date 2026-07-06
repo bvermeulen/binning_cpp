@@ -4,14 +4,19 @@
         {
             "type": "cppbuild",
             "label": "g++: build active file",
-            "command": "D:/cpp/mingw64/bin/g++.exe",
+            "command": "D:/cpp/msys64/ucrt64/bin/g++.exe",
             "args": [
                 "-std=c++20",
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
+                "src/bins.cpp",
+                "src/read_parse_sps.cpp",
+                "src/save_data.cpp",
                 "-o",
-                "${workspaceFolder}/build/debug/${fileBasenameNoExtension}.exe"
+                "${workspaceFolder}/build/debug/${fileBasenameNoExtension}.exe",
+                "-Iinclude",
+                "-lsqlite3"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
