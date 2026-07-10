@@ -1,23 +1,52 @@
 #ifndef BINNING_H
 #define BINNING_H
 #include <cmath>
+#include "config.h"
+#include "read_parse_sps.h"
+#include "bins.h"
+#include "binning.h"
 
 using namespace std;
 
-namespace cfg {
-    inline string file_stem = "./data/sps_phase1_final";
-    inline float deg_to_rad = acos(-1.0) / 180.0;
-    inline float rad_to_deg = 180 / acos(-1.0);
-    inline tuple<double, double, float> origin(
-        701692.0, 3450142.50, 90.0 * deg_to_rad
-    );
-    inline int nb_bin_sp = 780;
-    inline int nb_bin_rp = 1280;
-    inline double bin_sp_int = -25.0;
-    inline double bin_rp_int = 12.5;
-    inline float max_offset = 1000.0;
-    inline int epsg = 32638;
-    inline int base_pnt = 10'000;
-}
+// avoid circular import as SaveData uses binning.h
+class SaveData;
+
+struct TraceStruct {
+    int src_line;
+    int src_point;
+    int src_index;
+    string src_code;
+    int rcv_line;
+    int rcv_point;
+    int rcv_index;
+    string rcv_code;
+    double mid_point_x;
+    double mid_point_y;
+    float offset;
+    float azimuth;
+    int bin_sp;
+    int bin_rp;
+};
+
+class Binning 
+{
+    public:
+        Binning(
+            const ConfigStruct& config, 
+            SaveData& savedata, 
+            const vector<RcvStruct>& rcv, 
+            const vector<SrcStruct>& src, 
+            const vector<XStruct>& xrel, 
+            vector<BinStruct>& bins_ref);
+        void bin_sps();
+
+    private:
+        const ConfigStruct& cfg;
+        SaveData& sd;
+        const vector<RcvStruct>& rcv_sps;
+        const vector<SrcStruct>& src_sps;
+        const vector<XStruct>& x_sps;
+        vector<BinStruct>& bins;
+};
 
 #endif // BINNING_H

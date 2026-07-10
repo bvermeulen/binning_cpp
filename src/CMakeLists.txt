@@ -5,17 +5,20 @@ set(CMAKE_CXX_STANDARD 20)
 enable_language(C CXX)
 
 set(sources
-    binning.cpp
+    main.cpp
+    config.cpp
     bins.cpp
+    binning.cpp
     read_parse_sps.cpp
     save_data.cpp
 )
 
 include_directories(includes
     ../include
+    d:/cpp/boost_1_91_0
 )
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/debug)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
 add_executable(binning_cmake ${sources} ${includes})
 
 find_library(SQLITE3_LIBRARY NAMES sqlite3)

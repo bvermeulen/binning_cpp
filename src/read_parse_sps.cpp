@@ -9,12 +9,14 @@ using namespace std;
 
 namespace sps {
 
+    
     void parse_rcv_sps(string filename, vector<RcvStruct>& rcv_sps_vector) 
     {
         ifstream file(filename);
 
         if (!file.is_open()) {
-            cerr << "Error: Could not open the file!" << endl;
+            printf("Error, could not open the file: %s\n", filename.c_str());
+            exit(0);
         }
         string line;
         
@@ -38,6 +40,7 @@ namespace sps {
             rcv_sps_vector.push_back(rcv_sps);
         }
         file.close();
+        printf("SPS R records: %'lld\n", rcv_sps_vector.size());
     }
 
     void parse_src_sps(string filename, vector<SrcStruct>& src_sps_vector) 
@@ -45,7 +48,8 @@ namespace sps {
         ifstream file(filename);
 
         if (!file.is_open()) {
-            cerr << "Error: Could not open the file!" << endl;
+            printf("Error, could not open the file: %s\n", filename.c_str());
+            exit(0);
         }
         string line;
         
@@ -69,6 +73,7 @@ namespace sps {
             src_sps_vector.push_back(src_sps);
         }
         file.close();
+        printf("SPS S records: %'lld\n", src_sps_vector.size());
     }
 
     void parse_x_sps(string filename, vector<XStruct>& x_sps_vector) 
@@ -76,7 +81,8 @@ namespace sps {
         ifstream file(filename);
 
         if (!file.is_open()) {
-            cout << "Error: Could not open the file!" << endl;
+            printf("Error, could not open the file: %s\n", filename.c_str());
+            exit(0);
         }
         string line;
         
@@ -98,6 +104,7 @@ namespace sps {
             x_sps_vector.push_back(x_sps);
         }
         file.close();
+        printf("SPS X records: %'lld\n", x_sps_vector.size());
     }
 }
 

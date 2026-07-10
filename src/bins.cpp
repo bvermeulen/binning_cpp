@@ -1,10 +1,12 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include "binning.h"
+#include "config.h"
 #include "bins.h"
 
 using namespace std;
+
+BinCalc::BinCalc(const ConfigStruct& config) : cfg(config) {}
 
 tuple<double, double> BinCalc::xy_rotation_clockwise(double x, double y) 
 {
@@ -23,15 +25,15 @@ tuple<double, double> BinCalc::xy_rotation_ccw(double x, double y)
 tuple<double, double> BinCalc::calc_bin_coordinate(double src_distance, double rcv_distance)
 {
     auto coord = xy_rotation_clockwise(src_distance, rcv_distance);
-    double x = get<0>(coord) + get<0>(cfg::origin);
-    double y = get<1>(coord) + get<1>(cfg::origin);
+    double x = get<0>(coord) + get<0>(cfg.origin);
+    double y = get<1>(coord) + get<1>(cfg.origin);
     return make_tuple(x, y);
 }
 
 tuple<int, int> BinCalc::calc_bin_index(double x, double y)
 {
-    x -= get<0>(cfg::origin);
-    y -= get<1>(cfg::origin);
+    x -= get<0>(cfg.origin);
+    y -= get<1>(cfg.origin);
     auto coord = xy_rotation_ccw(x, y);
     int index_sp = round(get<0>(coord) / sp_int);
     int index_rp = round(get<1>(coord) / rp_int);
@@ -39,14 +41,15 @@ tuple<int, int> BinCalc::calc_bin_index(double x, double y)
 }
 
 int BinCalc::calc_point_index(int i, int j) {
-    return (cfg::base_pnt + i) * cfg::base_pnt * 10 + (cfg::base_pnt + j);
+    return (cfg.base_linepoint + i) * cfg.base_linepoint * 10 + (cfg.base_linepoint + j);
 }
 
 void BinCalc::create_bins(vector<BinStruct>& bins) {
-    for (int i=0; i < cfg::nb_bin_sp; i++) {
-        double src_distance = i * cfg::bin_sp_int;
-        for (int j=0; j < cfg::nb_bin_rp; j++) {
-            double rcv_distance = j * cfg::bin_rp_int;
+    for (int i=0; i < 
+        cfg.nb_bin_sp; i++) {
+        double src_distance = i * cfg.bin_sp_int;
+        for (int j=0; j < cfg.nb_bin_rp; j++) {
+            double rcv_distance = j * cfg.bin_rp_int;
             auto coord = calc_bin_coordinate(src_distance, rcv_distance);
             BinStruct bin;
             bin.id = calc_point_index(i, j);

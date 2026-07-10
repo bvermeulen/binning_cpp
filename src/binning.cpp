@@ -6,25 +6,34 @@
 #include <algorithm>
 #include <tuple>
 #include <cmath>
-#include "binning.h"
-#include "bins.h"
+#include "config.h"
 #include "read_parse_sps.h"
 #include "save_data.h"
+#include "bins.h"
+#include "binning.h"
 
 using namespace std;
 
-void binning(
-    const vector<RcvStruct>& rcv_sps,
-    const vector<SrcStruct>& src_sps,
-    const vector<XStruct>& x_sps,
-    vector<BinStruct>& bins
-) {
+Binning::Binning(
+    const ConfigStruct& config, 
+    SaveData& savedata, 
+    const vector<RcvStruct>& rcv, 
+    const vector<SrcStruct>& src, 
+    const vector<XStruct>& xrel,
+    vector<BinStruct>& bins_ref
+) : cfg(config), sd(savedata), rcv_sps(rcv), src_sps(src), x_sps(xrel), bins(bins_ref) {}
+
+void Binning::bin_sps()
+{
     int src_line, src_point, src_index;
-    int rcv_line, rcv_point_start, rcv_point_end, rcv_index;
+    int rcv_line, rcv_point, rcv_point_start, rcv_point_end, rcv_index;
+    string src_code, rcv_code;
     int id, src_bin, rcv_bin, trace_count;
     double src_easting, src_northing, mid_point_x, mid_point_y, dx, dy;
     float azimuth, offset;
-    BinCalc bin;
+    BinCalc bin(cfg);
+    TraceStruct trace;
+    vector<TraceStruct> traces;
 
     trace_count = 0;
     for (const auto& x_row : x_sps) {
@@ -38,6 +47,7 @@ void binning(
         );
         src_easting = src_item->easting;
         src_northing = src_item->northing;
+        src_code = src_item -> p_code;
         rcv_line = x_row.rcv_line;
         rcv_point_start = x_row.rcv_point_start;
         rcv_point_end = x_row.rcv_point_end;
@@ -52,55 +62,52 @@ void binning(
             }
         );
         for (const auto& rcv_item : rcv_items) {
+            if (trace_count % cfg.batch_size == 0) {
+                if (trace_count != 0) {
+                    printf("Trace count: %'11d: ", trace_count);
+                    sd.insert_traces(traces);
+                }
+                traces.clear();
+            }
+
             mid_point_x = (src_easting + rcv_item.easting) * 0.5;
             mid_point_y = (src_northing + rcv_item.northing) * 0.5;
-            dx = rcv_item.easting - src_easting;
-            dy = rcv_item.northing - src_northing;
-            azimuth = atan2(dy, dx) * cfg::rad_to_deg;
-            offset = sqrt(dx*dx + dy*dy);
-            if (offset > cfg::max_offset) continue;
             auto val = bin.calc_bin_index(mid_point_x, mid_point_y);
             src_bin = get<0>(val);
             rcv_bin = get<1>(val);
-            if (src_bin > cfg::nb_bin_sp || rcv_bin > cfg::nb_bin_rp) continue;
+            if (src_bin > cfg.nb_bin_sp || rcv_bin > cfg.nb_bin_rp) continue;
+            rcv_point = rcv_item.point;
+            rcv_code = rcv_item.p_code;
+            dx = rcv_item.easting - src_easting;
+            dy = rcv_item.northing - src_northing;
+            azimuth = atan2(dy, dx) * RAD_TO_DEG;
+            offset = sqrt(dx*dx + dy*dy);
+            trace.src_line = src_line;
+            trace.src_point = src_point;
+            trace.src_index = src_index;
+            trace.src_code = src_code;
+            trace.rcv_line = rcv_line;
+            trace.rcv_point = rcv_point;
+            trace.rcv_index = rcv_index;
+            trace.rcv_code = rcv_code;
+            trace.mid_point_x = mid_point_x;
+            trace.mid_point_y = mid_point_y;
+            trace.offset = offset;
+            trace.azimuth = azimuth;
+            trace.bin_sp = src_bin;
+            trace.bin_rp = rcv_bin;
+            traces.push_back(trace);
+            trace_count++;
+
             id = bin.calc_point_index(src_bin, rcv_bin);
             auto bin_item = lower_bound(bins.begin(), bins.end(), id, 
                 [](BinStruct& b, int value){return b.id < value;}
             );
-            if (bin_item != bins.end()) {
+            if (bin_item != bins.end() && offset <= cfg.max_offset) {
                 bin_item->bin_count++;
-                if (trace_count % 1'000'000 == 0) {
-                    printf("trace count: %d\n", trace_count);
-                };
-                trace_count++;
             }
         }
     }
-}
-
-int main() {
-    vector<RcvStruct> rcv_sps, matched_rcv;
-    vector<SrcStruct> src_sps;
-    vector<XStruct> x_sps;
-    vector<BinStruct> bins, matched_bins;
-    BinCalc bc;
-    SaveData sd;
-    sps::parse_rcv_sps(cfg::file_stem + ".R", rcv_sps);
-    sps::parse_src_sps(cfg::file_stem + ".S", src_sps);
-    sps::parse_x_sps(cfg::file_stem + ".X", x_sps);
-    bc.create_bins(bins);
-    printf("number of bins: %lld\n", bins.size());
-    binning(rcv_sps, src_sps, x_sps, bins);
-    int i = 400;
-    int j = 700;
-    auto bin = find_if(bins.begin(), bins.end(), [i, j](const BinStruct& b) {return (b.bin_sp == i && b.bin_rp == j);});
-    printf("bin_sp: %d, bin_rp: %d, easting: %.0f, northing: %.0f, bin_count: %d\n",
-        bin->bin_sp, bin->bin_rp, bin->easting, bin->northing, bin->bin_count
-    );
-    sd.save_bins_csv(cfg::file_stem + ".csv", bins);
-    sd.create_database(cfg::file_stem + ".sqlite");
-    sd.create_bin_table();
-    sd.insert_bins(bins);
-    sd.close_database();
-    return 0;
+    printf("Trace count: %'11d: ", trace_count);
+    sd.insert_traces(traces);
 }
