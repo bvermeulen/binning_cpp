@@ -10,7 +10,7 @@ ConfigStruct read_config(string file_config) {
     string bin_files_stem;
     float azimuth, max_offset, bin_sp_int, bin_rp_int;
     double origin_easting, origin_northing;
-    int nb_bin_sp, nb_bin_rp, epsg, base_linepoint, batch_size;
+    int nb_bin_sp, nb_bin_rp, epsg, batch_size;
     ifstream file(file_config);
     if (!file.is_open()) {
         printf("Error, could not open the file: %s!\n", file_config.c_str());
@@ -34,7 +34,6 @@ ConfigStruct read_config(string file_config) {
         nb_bin_rp = boost::json::value_to<int>(obj.at("nb_bin_rp"));
         max_offset = boost::json::value_to<float>(obj.at("max_offset"));
         epsg = boost::json::value_to<int>(obj.at("epsg"));
-        base_linepoint = boost::json::value_to<int>(obj.at("base_linepoint"));
         batch_size = boost::json::value_to<int>(obj.at("batch_size"));
     } 
     catch (exception const& e) {
@@ -50,7 +49,7 @@ ConfigStruct read_config(string file_config) {
     cfg.bin_rp_int = bin_rp_int;
     cfg.max_offset = max_offset;
     cfg.epsg = epsg;
-    cfg.base_linepoint = base_linepoint;
+    cfg.base_linepoint = BASE_LINEPOINT;
     cfg.batch_size = batch_size;
     return cfg;
 }
