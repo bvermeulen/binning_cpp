@@ -9,6 +9,5 @@
     "nb_bin_rp": 1280,
     "max_offset": 3500.00,
     "epsg": 32638,
-    "base_linepoint": 10000,
     "batch_size": 1000000
 }
