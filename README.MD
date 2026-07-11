@@ -48,7 +48,4 @@ QGIS fold plot is shown below for offset 0 - 1500 meter.
 # Installation
 - create and go to a folder `build`
 - run: `cmake ../src`
-- run: ming32-make`
-
-```
-create a 
+- run: `ming32-make`
