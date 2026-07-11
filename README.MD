@@ -44,3 +44,11 @@ update bins set bin_count = bc from
 QGIS fold plot is shown below for offset 0 - 1500 meter.
 
 ![fold plot 1500](example_bin_1500.png)
+
+# Installation
+- create and go to a folder `build`
+- run: `cmake ../src`
+- run: ming32-make`
+
+```
+create a 
