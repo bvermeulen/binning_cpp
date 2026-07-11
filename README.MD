@@ -21,7 +21,7 @@ Example of `config.json` file:
     "batch_size": 1000000
 }
 ```
-`base_linepoint` is to create an unique identifier for a bin bin point, for example: `1084513250` (src_bin 845, recv_bin 3250`)
+`base_linepoint` is to create an unique identifier for a bin bin point, for example: `1084513250` (src_bin 845, recv_bin 3250)
 `batch_size` is the number of traces inserted in the database per transaction
 
 Bins and traces are stored in a SQLite database. Binning can be updated using the following queries for source index 1 and 2 and a maximum offset of 3500 meter:
