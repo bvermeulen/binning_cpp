@@ -17,11 +17,9 @@ Example of `config.json` file:
     "nb_bin_rp": 1280,
     "max_offset": 3500.00,
     "epsg": 32638,
-    "base_linepoint": 10000,
     "batch_size": 1000000
 }
 ```
-`base_linepoint` is to create an unique identifier for a bin bin point, for example: `1084513250` (src_bin 845, recv_bin 3250`)
 `batch_size` is the number of traces inserted in the database per transaction
 
 Bins and traces are stored in a SQLite database. Binning can be updated using the following queries for source index 1 and 2 and a maximum offset of 3500 meter:
@@ -44,3 +42,8 @@ update bins set bin_count = bc from
 QGIS fold plot is shown below for offset 0 - 1500 meter.
 
 ![fold plot 1500](example_bin_1500.png)
+
+# Installation
+- create and go to a folder `build`
+- run: `cmake ../src`
+- run: `ming32-make`
