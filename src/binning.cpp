@@ -16,12 +16,12 @@ using namespace std;
 
 Binning::Binning(
     const ConfigStruct& config, 
+    BinCalc& bincalc,
     SaveData& savedata, 
     const vector<RcvStruct>& rcv, 
     const vector<SrcStruct>& src, 
-    const vector<XStruct>& xrel,
-    vector<BinStruct>& bins_ref
-) : cfg(config), sd(savedata), rcv_sps(rcv), src_sps(src), x_sps(xrel), bins(bins_ref) {}
+    const vector<XStruct>& xrel
+) : cfg(config), bc(bincalc), sd(savedata), rcv_sps(rcv), src_sps(src), x_sps(xrel) {}
 
 void Binning::bin_sps()
 {
@@ -31,9 +31,7 @@ void Binning::bin_sps()
     int id, src_bin, rcv_bin, trace_count;
     double src_easting, src_northing, mid_point_x, mid_point_y, dx, dy;
     float azimuth, offset;
-    BinCalc bin(cfg);
     TraceStruct trace;
-    vector<TraceStruct> traces;
 
     trace_count = 0;
     for (const auto& x_row : x_sps) {
@@ -72,7 +70,7 @@ void Binning::bin_sps()
 
             mid_point_x = (src_easting + rcv_item.easting) * 0.5;
             mid_point_y = (src_northing + rcv_item.northing) * 0.5;
-            auto val = bin.calc_bin_index(mid_point_x, mid_point_y);
+            auto val = bc.calc_bin_index(mid_point_x, mid_point_y);
             src_bin = get<0>(val);
             rcv_bin = get<1>(val);
             if (src_bin > cfg.nb_bin_sp || rcv_bin > cfg.nb_bin_rp) continue;
@@ -99,11 +97,11 @@ void Binning::bin_sps()
             traces.push_back(trace);
             trace_count++;
 
-            id = bin.calc_point_index(src_bin, rcv_bin);
-            auto bin_item = lower_bound(bins.begin(), bins.end(), id, 
+            id = bc.calc_point_index(src_bin, rcv_bin);
+            auto bin_item = lower_bound(bc.bins.begin(), bc.bins.end(), id, 
                 [](BinStruct& b, int value){return b.id < value;}
             );
-            if (bin_item != bins.end() && offset <= cfg.max_offset) {
+            if (bin_item != bc.bins.end() && offset <= cfg.max_offset) {
                 bin_item->bin_count++;
             }
         }

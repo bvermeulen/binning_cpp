@@ -44,7 +44,7 @@ int BinCalc::calc_point_index(int i, int j) {
     return (cfg.base_linepoint + i) * cfg.base_linepoint * 10 + (cfg.base_linepoint + j);
 }
 
-void BinCalc::create_bins(vector<BinStruct>& bins) {
+void BinCalc::create_bins() {
     for (int i=0; i < 
         cfg.nb_bin_sp; i++) {
         double src_distance = i * cfg.bin_sp_int;

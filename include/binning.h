@@ -32,21 +32,23 @@ class Binning
 {
     public:
         Binning(
-            const ConfigStruct& config, 
+            const ConfigStruct& config,
+            BinCalc& bincalc, 
             SaveData& savedata, 
             const vector<RcvStruct>& rcv, 
             const vector<SrcStruct>& src, 
-            const vector<XStruct>& xrel, 
-            vector<BinStruct>& bins_ref);
+            const vector<XStruct>& xrel
+        );
+        vector<TraceStruct> traces;
         void bin_sps();
 
     private:
         const ConfigStruct& cfg;
+        BinCalc& bc;
         SaveData& sd;
         const vector<RcvStruct>& rcv_sps;
         const vector<SrcStruct>& src_sps;
         const vector<XStruct>& x_sps;
-        vector<BinStruct>& bins;
 };
 
 #endif // BINNING_H
