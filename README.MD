@@ -1,7 +1,28 @@
 # Seismic binning - fold plot
 
-* binning.exe - read sps files (R,S, X), create traces and store traces in the database 
-* CPP version of seisbinning (at least  10x faster)
+* binning.exe - reads the sps files (R,S, X) and creates bins and traces 
+* configuration is given in json config file, default location and file name is `./config.json`, otherwise config filename can be given as the first argument
+* This is a CPP version of seisbinning (at least  10x faster)
+
+Example of `config.json` file:
+```
+{
+    "bin_files_stem": "d:/data/sps_phase1_final",
+    "azimuth": 90,
+    "origin_easting": 701692.00,
+    "origin_northing": 3450142.50,
+    "bin_sp_int": -25.0,
+    "bin_rp_int": 12.5,
+    "nb_bin_sp": 780,
+    "nb_bin_rp": 1280,
+    "max_offset": 3500.00,
+    "epsg": 32638,
+    "base_linepoint": 10000,
+    "batch_size": 1000000
+}
+```
+`base_linepoint` is to create an unique identifier for a bin bin point, for example: `1084513250` (src_bin 845, recv_bin 3250`)
+`batch_size` is the number of traces inserted in the database per transaction
 
 Bins and traces are stored in a SQLite database. Binning can be updated using the following queries for source index 1 and 2 and a maximum offset of 3500 meter:
 ```
