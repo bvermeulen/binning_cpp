@@ -4,7 +4,7 @@
         {
             "type": "cppbuild",
             "label": "g++: build binning",
-            "command": "D:/cpp/msys64/ucrt64/bin/g++.exe",
+            "command": "g++",
             "args": [
                 "-std=c++20",
                 "-fdiagnostics-color=always",
@@ -16,9 +16,8 @@
                 "src/bins.cpp",
                 "src/binning.cpp",
                 "-Iinclude",
-                "-Id:/cpp/boost_1_91_0",
                 "-o",
-                "${workspaceFolder}/bin/debug/binning.exe",
+                "${workspaceFolder}/bin/debug/binning",
                 "-lsqlite3"
             ],
             "options": {
@@ -36,7 +35,7 @@
         {
             "type": "cppbuild",
             "label": "g++: build active file",
-            "command": "D:/cpp/msys64/ucrt64/bin/g++.exe",
+            "command": "g++",
             "args": [
                 "-std=c++20",
                 "-fdiagnostics-color=always",
@@ -45,7 +44,7 @@
                 "-Iinclude",
                 "-Id:/cpp/boost_1_91_0",
                 "-o",
-                "${workspaceFolder}/bin/debug/${fileBasename}.exe",
+                "${workspaceFolder}/bin/debug/${fileBasename}",
                 "-lsqlite3"
             ],
             "options": {

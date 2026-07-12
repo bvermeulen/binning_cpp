@@ -120,7 +120,7 @@ void SaveData::create_traces_table() {
         sqlite3_close(db);
         exit(0);
     }
-    
+
     sql = (
         "CREATE TABLE traces ("
         "id INTEGER PRIMARY KEY, "
@@ -175,7 +175,7 @@ void SaveData::insert_bins(const vector<BinStruct>& bins) {
         sqlite3_bind_double(stmt, 6, bin.easting);
         sqlite3_bind_double(stmt, 7, bin.northing);
         sqlite3_bind_int(stmt, 8, cfg.epsg);
-    
+
         if (sqlite3_step(stmt) != SQLITE_DONE) {
             printf("Insert failed: %s\n", sqlite3_errmsg(db));
         }
@@ -184,7 +184,7 @@ void SaveData::insert_bins(const vector<BinStruct>& bins) {
     }
     sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
-    printf("Bins successfully inserted: %'lld\n", bins.size());    
+    printf("Bins successfully inserted: %'lu\n", bins.size());
 }
 
 void SaveData::insert_traces(const vector<TraceStruct>& traces) {
@@ -214,7 +214,7 @@ void SaveData::insert_traces(const vector<TraceStruct>& traces) {
         sqlite3_bind_double(stmt, 12, trace.azimuth);
         sqlite3_bind_int(stmt, 13, trace.bin_sp);
         sqlite3_bind_int(stmt, 14, trace.bin_rp);
-        
+
         if (sqlite3_step(stmt) != SQLITE_DONE) {
             printf("Insert failed: %s\n", sqlite3_errmsg(db));
         }
@@ -223,7 +223,7 @@ void SaveData::insert_traces(const vector<TraceStruct>& traces) {
     }
     sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
-    printf("%'9lld traces successfully inserted\n", traces.size());    
+    printf("%'10lu traces successfully inserted\n", traces.size());
 }
 
 void SaveData::close_database() {

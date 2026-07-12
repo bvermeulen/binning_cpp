@@ -15,11 +15,11 @@
 using namespace std;
 
 Binning::Binning(
-    const ConfigStruct& config, 
+    const ConfigStruct& config,
     BinCalc& bincalc,
-    SaveData& savedata, 
-    const vector<RcvStruct>& rcv, 
-    const vector<SrcStruct>& src, 
+    SaveData& savedata,
+    const vector<RcvStruct>& rcv,
+    const vector<SrcStruct>& src,
     const vector<XStruct>& xrel
 ) : cfg(config), bc(bincalc), sd(savedata), rcv_sps(rcv), src_sps(src), x_sps(xrel) {}
 
@@ -39,7 +39,7 @@ void Binning::bin_sps()
         src_point = x_row.src_point;
         src_index = x_row.src_index;
         auto src_item = find_if(
-            src_sps.begin(), src_sps.end(), 
+            src_sps.begin(), src_sps.end(),
             [src_line, src_point, src_index](const SrcStruct& s)
             {return (s.line == src_line) && (s.point == src_point) && (s.p_index == src_index);}
         );
@@ -51,10 +51,10 @@ void Binning::bin_sps()
         rcv_point_end = x_row.rcv_point_end;
         rcv_index = x_row.rcv_index;
         vector<RcvStruct> rcv_items;
-        copy_if(rcv_sps.begin(), rcv_sps.end(), back_inserter(rcv_items), 
+        copy_if(rcv_sps.begin(), rcv_sps.end(), back_inserter(rcv_items),
             [rcv_line, rcv_point_start, rcv_point_end, rcv_index]
-            (const RcvStruct& r) {return 
-                (r.line == rcv_line) && 
+            (const RcvStruct& r) {return
+                (r.line == rcv_line) &&
                 (r.point >= rcv_point_start) && (r.point <= rcv_point_end) &&
                 (r.p_index == rcv_index);
             }
@@ -98,7 +98,7 @@ void Binning::bin_sps()
             trace_count++;
 
             id = bc.calc_point_index(src_bin, rcv_bin);
-            auto bin_item = lower_bound(bc.bins.begin(), bc.bins.end(), id, 
+            auto bin_item = lower_bound(bc.bins.begin(), bc.bins.end(), id,
                 [](BinStruct& b, int value){return b.id < value;}
             );
             if (bin_item != bc.bins.end() && offset <= cfg.max_offset) {
