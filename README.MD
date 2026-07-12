@@ -7,7 +7,7 @@
 Example of `config.json` file:
 ```
 {
-    "bin_files_stem": "d:/data/sps_phase1_final",
+    "bin_files_stem": "/home/johnnybegood/project/binning/sps_phase1_final",
     "azimuth": 90,
     "origin_easting": 701692.00,
     "origin_northing": 3450142.50,
