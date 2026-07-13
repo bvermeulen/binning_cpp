@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     binning.bin_sps();
     int i = 400;
     int j = 700;
-    auto bin = find_if(bc.bins.begin(), bc.bins.end(), [i, j](const BinStruct& b) {return (b.bin_sp == i && b.bin_rp == j);});
+    auto bin = ranges::find_if(bc.bins, [i, j](const BinStruct& b) {return (b.bin_sp == i && b.bin_rp == j);});
     printf("bin_sp: %d, bin_rp: %d, easting: %.0f, northing: %.0f, bin_count: %d\n",
         bin->bin_sp, bin->bin_rp, bin->easting, bin->northing, bin->bin_count
     );

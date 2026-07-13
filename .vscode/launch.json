@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/debug/binning",
-            "args": ["${workspaceFolder}/bin/config.json"],
+            "args": ["${workspaceFolder}/bin/correct_config.json"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],

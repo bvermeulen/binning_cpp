@@ -1,6 +1,6 @@
 # Seismic binning - fold plot
 
-* binning.exe - reads the sps files (R,S, X) and creates bins and traces 
+* binning.exe - reads the sps files (R,S, X) and creates bins and traces
 * configuration is given in json config file, default location and file name is `./config.json`, otherwise config filename can be given as the first argument
 * This is a CPP version of seisbinning (at least  10x faster)
 
@@ -17,7 +17,7 @@ Example of `config.json` file:
     "nb_bin_rp": 1280,
     "max_offset": 3500.00,
     "epsg": 32638,
-    "batch_size": 1000000
+    "batch_size": 10000000
 }
 ```
 `batch_size` is the number of traces inserted in the database per transaction
@@ -28,11 +28,11 @@ Bins and traces are stored in a SQLite database. Binning can be updated using th
 update bins set bin_count = null;
 ```
 ```
-/* calculate bin_count from traces */ 
-update bins set bin_count = bc from 
-	(select bin_sp, bin_rp, count(*) as bc 
-		from traces tr 
-			where 
+/* calculate bin_count from traces */
+update bins set bin_count = bc from
+	(select bin_sp, bin_rp, count(*) as bc
+		from traces tr
+			where
 				tr.offset >= 0 and tr.offset < 3500 and
 				tr.src_index < 3 and tr.rcv_index < 3
 			group by tr.bin_sp, tr.bin_rp
