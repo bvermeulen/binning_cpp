@@ -25,15 +25,15 @@ tuple<double, double> BinCalc::xy_rotation_ccw(double x, double y)
 tuple<double, double> BinCalc::calc_bin_coordinate(double src_distance, double rcv_distance)
 {
     auto coord = xy_rotation_clockwise(src_distance, rcv_distance);
-    double x = get<0>(coord) + get<0>(cfg.origin);
-    double y = get<1>(coord) + get<1>(cfg.origin);
+    double x = get<0>(coord) + cfg.easting_orig;
+    double y = get<1>(coord) + cfg.northing_orig;
     return make_tuple(x, y);
 }
 
 tuple<int, int> BinCalc::calc_bin_index(double x, double y)
 {
-    x -= get<0>(cfg.origin);
-    y -= get<1>(cfg.origin);
+    x -= cfg.easting_orig;
+    y -= cfg.northing_orig;
     auto coord = xy_rotation_ccw(x, y);
     int index_sp = round(get<0>(coord) / sp_int);
     int index_rp = round(get<1>(coord) / rp_int);

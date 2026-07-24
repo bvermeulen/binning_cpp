@@ -25,10 +25,10 @@ class BinCalc
     
     private:
         const ConfigStruct& cfg;
-        float cos_azim = cos(get<2>(cfg.origin));
-        float sin_azim = sin(get<2>(cfg.origin));
-        float cos_azim_ccw = cos(-get<2>(cfg.origin));
-        float sin_azim_ccw = sin(-get<2>(cfg.origin));
+        float cos_azim = cos(cfg.azimuth * DEG2RAD);
+        float sin_azim = sin(cfg.azimuth * DEG2RAD);
+        float cos_azim_ccw = cos(-cfg.azimuth * DEG2RAD);
+        float sin_azim_ccw = sin(-cfg.azimuth * DEG2RAD);
         double sp_int = cfg.bin_sp_int;
         double rp_int = cfg.bin_rp_int;
         tuple<double, double> xy_rotation_clockwise(double x, double y);

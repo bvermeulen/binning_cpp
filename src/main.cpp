@@ -5,8 +5,8 @@
 #include "config.h"
 #include "read_parse_sps.h"
 #include "bins.h"
-#include "binning.h"
-#include "save_data.h"
+#include "traces.h"
+#include "data_handling.h"
 
 using namespace std;
 
@@ -25,25 +25,23 @@ int main(int argc, char* argv[]) {
     vector<XStruct> x_sps;
     ConfigStruct cfg = read_config(config_file);
     BinCalc bc(cfg);
-    SaveData sd(cfg);
-    Binning binning(cfg, bc, sd, rcv_sps, src_sps, x_sps);
+    DbHandling db(cfg);
+    CsvHandling csv(cfg);
+    Traces trc(cfg, bc, db, rcv_sps, src_sps, x_sps);
     
-    sps::parse_rcv_sps(cfg.bin_files_stem + ".R", rcv_sps);
-    sps::parse_src_sps(cfg.bin_files_stem + ".S", src_sps);
-    sps::parse_x_sps(cfg.bin_files_stem + ".X", x_sps);
-    sd.create_database(cfg.bin_files_stem + ".sqlite");
-    sd.create_bins_table();
-    sd.create_traces_table();
+    sps::parse_rcv_sps(cfg.file_stem + ".R", rcv_sps);
+    sps::parse_src_sps(cfg.file_stem + ".S", src_sps);
+    sps::parse_x_sps(cfg.file_stem + ".X", x_sps);
+    
+    db.create_database(cfg.file_stem + ".sqlite");
+    db.create_seis_config_table();
+    db.store_config();
+    db.create_bins_table();
+    db.create_traces_table();
     bc.create_bins();
     printf("number of bins: %'lld\n", bc.bins.size());
-    binning.bin_sps();
-    int i = 400;
-    int j = 700;
-    auto bin = find_if(bc.bins.begin(), bc.bins.end(), [i, j](const BinStruct& b) {return (b.bin_sp == i && b.bin_rp == j);});
-    printf("bin_sp: %d, bin_rp: %d, easting: %.0f, northing: %.0f, bin_count: %d\n",
-        bin->bin_sp, bin->bin_rp, bin->easting, bin->northing, bin->bin_count
-    );
-    sd.save_bins_csv(cfg.bin_files_stem + ".csv", bc.bins);
-    sd.insert_bins(bc.bins);
-    sd.close_database();
+    trc.create_traces();
+    csv.save_bins_csv(cfg.file_stem + ".csv", bc.bins);
+    db.insert_bins(bc.bins);
+    db.close_database();
 }
