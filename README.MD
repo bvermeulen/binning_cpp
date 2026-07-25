@@ -1,13 +1,13 @@
 # Seismic binning - fold plot
 
-* binning.exe - reads the sps files (R,S, X) and creates bins and traces 
-* configuration is given in json config file, default location and file name is `./config.json`, otherwise config filename can be given as the first argument
+* binning.exe - reads standard SPS files (R,S, X) and creates bins and traces of source / receiver pairs which are stored in a SQLite database. The SPS files must have the same name with extensions .R, .S, .X. The file name (stem) is given in the configuration file.
+* configuration is given in a json config file, with a default file name `./config.json` (located in the same folder as the executable), otherwise config filename can be given as the first argument. Azimuth is the angle of the receiver line with north (in degrees) with a positive numbering south to north (receivers) and west to east (sources) for azimuth zero. A pre-requisite is that source and receiver lines are orthogonal. Origin easting and northing are the co-ordinates for the bin (0, 0).  
 * This is a CPP version of seisbinning (at least  10x faster)
 
 Example of `config.json` file:
 ```
 {
-    "bin_files_stem": "d:/data/sps_phase1_final",
+    "file_stem": "d:/data/sps_phase1_final",
     "azimuth": 90,
     "origin_easting": 701692.00,
     "origin_northing": 3450142.50,
@@ -15,14 +15,15 @@ Example of `config.json` file:
     "bin_rp_int": 12.5,
     "nb_bin_sp": 780,
     "nb_bin_rp": 1280,
-    "max_offset": 3500.00,
+    "max_offset": 3500,
+    "src_indexes": [0],
     "epsg": 32638,
     "batch_size": 1000000
 }
 ```
 `batch_size` is the number of traces inserted in the database per transaction
 
-Bins and traces are stored in a SQLite database. Binning can be updated using the following queries for source index 1 and 2 and a maximum offset of 3500 meter:
+Bins and traces are stored in a SQLite database. Binning can be done using the following query for source index 1 and 2 and a maximum offset of 3500 meter:
 ```
 /* remove first all existing values from bins */
 update bins set bin_count = null;
