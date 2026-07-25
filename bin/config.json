@@ -7,7 +7,7 @@
     "bin_rp_int": 12.5,
     "nb_bin_sp": 780,
     "nb_bin_rp": 1280,
-    "offset": 0,
+    "offset": 4500,
     "src_indexes": [0],
     "epsg": 32638,
     "batch_size": 1000000
