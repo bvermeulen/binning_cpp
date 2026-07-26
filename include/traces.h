@@ -4,12 +4,13 @@
 #include "config.h"
 #include "read_parse_sps.h"
 #include "bins.h"
-#include "binning.h"
+#include "traces.h"
 
 using namespace std;
 
-// avoid circular import as SaveData uses binning.h
-class SaveData;
+// avoid circular import as DbHandling uses binning.h
+class DbHandling;
+class CsvHamdling;
 
 struct TraceStruct {
     int src_line;
@@ -28,24 +29,24 @@ struct TraceStruct {
     int bin_rp;
 };
 
-class Binning 
+class Traces 
 {
     public:
-        Binning(
+        Traces(
             const ConfigStruct& config,
             BinCalc& bincalc, 
-            SaveData& savedata, 
+            DbHandling& db_handle, 
             const vector<RcvStruct>& rcv, 
             const vector<SrcStruct>& src, 
             const vector<XStruct>& xrel
         );
         vector<TraceStruct> traces;
-        void bin_sps();
+        void create_traces();
 
     private:
         const ConfigStruct& cfg;
         BinCalc& bc;
-        SaveData& sd;
+        DbHandling& db;
         const vector<RcvStruct>& rcv_sps;
         const vector<SrcStruct>& src_sps;
         const vector<XStruct>& x_sps;

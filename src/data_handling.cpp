@@ -5,14 +5,15 @@
 #include <sqlite3.h>
 #include "config.h"
 #include "bins.h"
-#include "binning.h"
-#include "save_data.h"
+#include "traces.h"
+#include "data_handling.h"
 
 using namespace std;
 
-SaveData::SaveData(const ConfigStruct& config) : cfg(config) {}
+CsvHandling::CsvHandling(const ConfigStruct& config) : cfg(config) {}
+DbHandling::DbHandling(const ConfigStruct& config) : cfg(config) {}
 
-void SaveData::save_bins_csv(string filename, const vector<BinStruct>& bins) {
+void CsvHandling::save_bins_csv(string filename, const vector<BinStruct>& bins) {
     string line;
     ofstream outfile(filename);
     line = "id, bin_sp, bin_rp, easting, northing, bin_count\n";
@@ -30,7 +31,7 @@ void SaveData::save_bins_csv(string filename, const vector<BinStruct>& bins) {
     outfile.close();
 }
 
-void SaveData::create_database(string filename) {
+void DbHandling::create_database(string filename) {
     char *error_message = 0;
     if (sqlite3_open(filename.c_str(), &db)) {
         printf("Can't open database: %s\n", sqlite3_errmsg(db));
@@ -62,7 +63,7 @@ void SaveData::create_database(string filename) {
     }
 }
 
-void SaveData::create_bins_table() {
+void DbHandling::create_bins_table() {
     char *error_message = 0;
     string sql;
     sql = (
@@ -108,7 +109,7 @@ void SaveData::create_bins_table() {
     }
 }
 
-void SaveData::create_traces_table() {
+void DbHandling::create_traces_table() {
     char *error_message = 0;
     string sql;
     sql = (
@@ -150,7 +151,36 @@ void SaveData::create_traces_table() {
     }
 }
 
-void SaveData::insert_bins(const vector<BinStruct>& bins) {
+void DbHandling::create_seis_config_table() {
+    char *error_message = 0;
+    string sql;
+    sql = (
+        "DROP TABLE IF EXISTS seis_config;"
+    );
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK) {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+    sql = (
+        "CREATE TABLE seis_config ("
+        "key TEXT PRIMARY KEY, "
+        "value TEXT NOT NULL"
+        ");"
+    );
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK) {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    } else {
+        printf("Table seis_config successfully added!\n");
+    }
+}
+
+
+void DbHandling::insert_bins(const vector<BinStruct>& bins) {
     string sql;
     sqlite3_stmt* stmt;
     sql = (
@@ -187,7 +217,7 @@ void SaveData::insert_bins(const vector<BinStruct>& bins) {
     printf("Bins successfully inserted: %'lu\n", bins.size());
 }
 
-void SaveData::insert_traces(const vector<TraceStruct>& traces) {
+void DbHandling::insert_traces(const vector<TraceStruct>& traces) {
     string sql;
     sqlite3_stmt* stmt;
     sql = (
@@ -223,9 +253,68 @@ void SaveData::insert_traces(const vector<TraceStruct>& traces) {
     }
     sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
-    printf("%'10lu traces successfully inserted\n", traces.size());
+    printf("%'9lu traces successfully inserted\n", traces.size());
 }
 
-void SaveData::close_database() {
+void DbHandling::index_traces() {
+    char *error_message = 0;
+    string sql;
+    sql = (
+        "DROP INDEX IF EXISTS idx_traces;"
+    );
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK) {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+
+    sql = (
+        "CREATE INDEX idx_traces ON traces (bin_sp, bin_rp);"
+    );
+    if (sqlite3_exec(db, sql.c_str(), NULL, NULL, &error_message) != SQLITE_OK) {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+    else {
+        printf("Traces successfully indexed!\n");
+    }
+}
+
+void DbHandling::update_seis_config(string key, string value) {
+    string sql;
+    sqlite3_stmt* stmt;
+    sql = (
+        "INSERT OR REPLACE INTO seis_config (key, value) "
+        "VALUES (?, ?);"
+    );
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, value.c_str(), -1, SQLITE_STATIC);
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+        printf("Insert failed: %s\n", sqlite3_errmsg(db));
+    }
+    sqlite3_finalize(stmt);
+}
+
+void DbHandling::store_config() {
+    update_seis_config("file_stem", cfg.file_stem);
+    update_seis_config("azimuth", to_string(cfg.azimuth));
+    update_seis_config("easting_orig", to_string(cfg.easting_orig));
+    update_seis_config("northing_orig", to_string(cfg.northing_orig));
+    update_seis_config("northing_orig", to_string(cfg.northing_orig));
+    update_seis_config("bin_sp_int", to_string(cfg.bin_sp_int));
+    update_seis_config("bin_rp_int", to_string(cfg.bin_rp_int));
+    update_seis_config("nb_bin_sp", to_string(cfg.nb_bin_sp));
+    update_seis_config("nb_bin_rp", to_string(cfg.nb_bin_rp));
+    update_seis_config("epsg", to_string(cfg.epsg));
+    update_seis_config("offset", to_string(cfg.offset));
+    update_seis_config("src_indexes", "0");
+    printf("config values stored in database!\n");
+}
+
+void DbHandling::close_database() {
     sqlite3_close(db);
 }

@@ -8,9 +8,9 @@ set(sources
     main.cpp
     config.cpp
     bins.cpp
-    binning.cpp
+    traces.cpp
     read_parse_sps.cpp
-    save_data.cpp
+    data_handling.cpp
 )
 
 include_directories(includes
