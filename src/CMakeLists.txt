@@ -8,7 +8,7 @@ set(sources
     main.cpp
     config.cpp
     bins.cpp
-    traces.cpp
+    binning.cpp
     read_parse_sps.cpp
     data_handling.cpp
 )

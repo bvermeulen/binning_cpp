@@ -5,7 +5,7 @@
 #include <sqlite3.h>
 #include "config.h"
 #include "bins.h"
-#include "traces.h"
+#include "binning.h"
 #include "data_handling.h"
 
 using namespace std;
@@ -63,6 +63,68 @@ void DbHandling::create_database(string filename) {
     }
 }
 
+void DbHandling::create_seis_config_table()
+{
+    char *error_message = 0;
+    string sql;
+    sql = ("DROP TABLE IF EXISTS seis_config;");
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+    sql = ("CREATE TABLE seis_config ("
+           "key TEXT PRIMARY KEY, "
+           "value TEXT NOT NULL"
+           ");");
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+    else
+    {
+        printf("Table seis_config successfully added!\n");
+    }
+}
+
+void DbHandling::update_seis_config(string key, string value)
+{
+    string sql;
+    sqlite3_stmt *stmt;
+    sql = ("INSERT OR REPLACE INTO seis_config (key, value) "
+           "VALUES (?, ?);");
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, value.c_str(), -1, SQLITE_STATIC);
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        printf("Insert failed: %s\n", sqlite3_errmsg(db));
+    }
+    sqlite3_finalize(stmt);
+}
+
+void DbHandling::store_config()
+{
+    update_seis_config("file_stem", cfg.file_stem);
+    update_seis_config("azimuth", to_string(cfg.azimuth));
+    update_seis_config("easting_orig", to_string(cfg.easting_orig));
+    update_seis_config("northing_orig", to_string(cfg.northing_orig));
+    update_seis_config("northing_orig", to_string(cfg.northing_orig));
+    update_seis_config("bin_sp_int", to_string(cfg.bin_sp_int));
+    update_seis_config("bin_rp_int", to_string(cfg.bin_rp_int));
+    update_seis_config("nb_bin_sp", to_string(cfg.nb_bin_sp));
+    update_seis_config("nb_bin_rp", to_string(cfg.nb_bin_rp));
+    update_seis_config("epsg", to_string(cfg.epsg));
+    update_seis_config("offset", to_string(cfg.offset));
+    update_seis_config("src_indexes", "0");
+    printf("config values stored in database!\n");
+}
+
 void DbHandling::create_bins_table() {
     char *error_message = 0;
     string sql;
@@ -109,77 +171,6 @@ void DbHandling::create_bins_table() {
     }
 }
 
-void DbHandling::create_traces_table() {
-    char *error_message = 0;
-    string sql;
-    sql = (
-        "DROP TABLE IF EXISTS traces;"
-    );
-    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK) {
-        printf("SQL error: %s\n", error_message);
-        sqlite3_free(error_message);
-        sqlite3_close(db);
-        exit(0);
-    }
-
-    sql = (
-        "CREATE TABLE traces ("
-        "id INTEGER PRIMARY KEY, "
-        "src_line INTEGER, "
-        "src_point INTEGER, "
-        "src_index INTEGER, "
-        "src_code VAR(2), "
-        "rcv_line INTEGER, "
-        "rcv_point INTEGER, "
-        "rcv_index INTEGER, "
-        "rcv_code VAR(2), "
-        "mid_point_x DOUBLE PRECISION, "
-        "mid_point_y DOUBLE PRECISION, "
-        "offset REAL, "
-        "azimuth REAL, "
-        "bin_sp INTEGER, "
-        "bin_rp INTEGER "
-        ");"
-    );
-    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK) {
-        printf("SQL error: %s\n", error_message);
-        sqlite3_free(error_message);
-        sqlite3_close(db);
-        exit(0);
-    } else {
-        printf("Table tracess successfully added!\n");
-    }
-}
-
-void DbHandling::create_seis_config_table() {
-    char *error_message = 0;
-    string sql;
-    sql = (
-        "DROP TABLE IF EXISTS seis_config;"
-    );
-    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK) {
-        printf("SQL error: %s\n", error_message);
-        sqlite3_free(error_message);
-        sqlite3_close(db);
-        exit(0);
-    }
-    sql = (
-        "CREATE TABLE seis_config ("
-        "key TEXT PRIMARY KEY, "
-        "value TEXT NOT NULL"
-        ");"
-    );
-    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK) {
-        printf("SQL error: %s\n", error_message);
-        sqlite3_free(error_message);
-        sqlite3_close(db);
-        exit(0);
-    } else {
-        printf("Table seis_config successfully added!\n");
-    }
-}
-
-
 void DbHandling::insert_bins(const vector<BinStruct>& bins) {
     string sql;
     sqlite3_stmt* stmt;
@@ -217,35 +208,69 @@ void DbHandling::insert_bins(const vector<BinStruct>& bins) {
     printf("Bins successfully inserted: %'lu\n", bins.size());
 }
 
-void DbHandling::insert_traces(const vector<TraceStruct>& traces) {
+void DbHandling::create_sps_rcv_table()
+{
+    char *error_message = 0;
     string sql;
-    sqlite3_stmt* stmt;
+    sql = ("DROP TABLE IF EXISTS sps_rcv;");
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+
     sql = (
-        "INSERT INTO traces ( "
-        "src_line, src_point, src_index, src_code, "
-        "rcv_line, rcv_point, rcv_index, rcv_code, "
-        "mid_point_x, mid_point_y, offset, azimuth, bin_sp, bin_rp) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); "
+        "CREATE TABLE sps_rcv ("
+        "id INTEGER PRIMARY KEY, "
+        "type VAR(1), "
+        "line INTEGER, "
+        "point INTEGER, "
+        "p_index INTEGER, "
+        "p_code VAR(2), "
+        "easting DOUBLE PRECISION, "
+        "northing DOUBLE PRECISION, "
+        "elevation REAL"
+        ");"
+    );
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+    else
+    {
+        printf("Table sps_rcv successfully added!\n");
+    }
+}
+
+void DbHandling::insert_sps_rcv(const vector<RcvStruct> &sps_rcv)
+{
+    string sql;
+    sqlite3_stmt *stmt;
+    sql = (
+        "INSERT INTO sps_rcv ( "
+        "type, line, point, p_index, p_code, easting, northing, elevation) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
     );
     sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
     sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
-    for (const auto& trace : traces) {
-        sqlite3_bind_int(stmt, 1, trace.src_line);
-        sqlite3_bind_int(stmt, 2, trace.src_point);
-        sqlite3_bind_int(stmt, 3, trace.src_index);
-        sqlite3_bind_text(stmt, 4, trace.src_code.c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_int(stmt, 5, trace.rcv_line);
-        sqlite3_bind_int(stmt, 6, trace.rcv_point);
-        sqlite3_bind_int(stmt, 7, trace.rcv_index);
-        sqlite3_bind_text(stmt, 8, trace.rcv_code.c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_double(stmt, 9, trace.mid_point_x);
-        sqlite3_bind_double(stmt, 10, trace.mid_point_y);
-        sqlite3_bind_double(stmt, 11, trace.offset);
-        sqlite3_bind_double(stmt, 12, trace.azimuth);
-        sqlite3_bind_int(stmt, 13, trace.bin_sp);
-        sqlite3_bind_int(stmt, 14, trace.bin_rp);
+    for (const auto &rcv : sps_rcv)
+    {
+        sqlite3_bind_text(stmt, 1, rcv.type.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int(stmt, 2, rcv.line);
+        sqlite3_bind_int(stmt, 3, rcv.point);
+        sqlite3_bind_int(stmt, 4, rcv.p_index);
+        sqlite3_bind_text(stmt, 5, rcv.p_code.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_double(stmt, 6, rcv.easting);
+        sqlite3_bind_double(stmt, 7, rcv.northing);
+        sqlite3_bind_double(stmt, 8, rcv.elevation);
 
-        if (sqlite3_step(stmt) != SQLITE_DONE) {
+        if (sqlite3_step(stmt) != SQLITE_DONE)
+        {
             printf("Insert failed: %s\n", sqlite3_errmsg(db));
         }
         sqlite3_reset(stmt);
@@ -253,16 +278,16 @@ void DbHandling::insert_traces(const vector<TraceStruct>& traces) {
     }
     sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
-    printf("%'9lu traces successfully inserted\n", traces.size());
+    printf("Receiver SPS successfully inserted: %'lu\n", sps_rcv.size());
 }
 
-void DbHandling::index_traces() {
+void DbHandling::create_sps_src_table()
+{
     char *error_message = 0;
     string sql;
-    sql = (
-        "DROP INDEX IF EXISTS idx_traces;"
-    );
-    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK) {
+    sql = ("DROP TABLE IF EXISTS sps_src;");
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
         printf("SQL error: %s\n", error_message);
         sqlite3_free(error_message);
         sqlite3_close(db);
@@ -270,49 +295,143 @@ void DbHandling::index_traces() {
     }
 
     sql = (
-        "CREATE INDEX idx_traces ON traces (bin_sp, bin_rp);"
+        "CREATE TABLE sps_src ("
+        "id INTEGER PRIMARY KEY, "
+        "type VAR(1), "
+        "line INTEGER, "
+        "point INTEGER, "
+        "p_index INTEGER, "
+        "p_code VAR(2), "
+        "easting DOUBLE PRECISION, "
+        "northing DOUBLE PRECISION, "
+        "elevation REAL"
+        ");"
     );
-    if (sqlite3_exec(db, sql.c_str(), NULL, NULL, &error_message) != SQLITE_OK) {
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
         printf("SQL error: %s\n", error_message);
         sqlite3_free(error_message);
         sqlite3_close(db);
         exit(0);
     }
-    else {
-        printf("Traces successfully indexed!\n");
+    else
+    {
+        printf("Table sps_src successfully added!\n");
     }
 }
 
-void DbHandling::update_seis_config(string key, string value) {
+void DbHandling::insert_sps_src(const vector<SrcStruct> &sps_src)
+{
     string sql;
-    sqlite3_stmt* stmt;
+    sqlite3_stmt *stmt;
     sql = (
-        "INSERT OR REPLACE INTO seis_config (key, value) "
-        "VALUES (?, ?);"
+        "INSERT INTO sps_src ( "
+        "type, line, point, p_index, p_code, easting, northing, elevation) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
     );
+    sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
     sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
-    sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, value.c_str(), -1, SQLITE_STATIC);
-    if (sqlite3_step(stmt) != SQLITE_DONE) {
-        printf("Insert failed: %s\n", sqlite3_errmsg(db));
+    for (const auto &src : sps_src)
+    {
+        sqlite3_bind_text(stmt, 1, src.type.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int(stmt, 2, src.line);
+        sqlite3_bind_int(stmt, 3, src.point);
+        sqlite3_bind_int(stmt, 4, src.p_index);
+        sqlite3_bind_text(stmt, 5, src.p_code.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_double(stmt, 6, src.easting);
+        sqlite3_bind_double(stmt, 7, src.northing);
+        sqlite3_bind_double(stmt, 8, src.elevation);
+
+        if (sqlite3_step(stmt) != SQLITE_DONE)
+        {
+            printf("Insert failed: %s\n", sqlite3_errmsg(db));
+        }
+        sqlite3_reset(stmt);
+        sqlite3_clear_bindings(stmt);
     }
+    sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
+    printf("Receiver SPS successfully inserted: %'lu\n", sps_src.size());
 }
 
-void DbHandling::store_config() {
-    update_seis_config("file_stem", cfg.file_stem);
-    update_seis_config("azimuth", to_string(cfg.azimuth));
-    update_seis_config("easting_orig", to_string(cfg.easting_orig));
-    update_seis_config("northing_orig", to_string(cfg.northing_orig));
-    update_seis_config("northing_orig", to_string(cfg.northing_orig));
-    update_seis_config("bin_sp_int", to_string(cfg.bin_sp_int));
-    update_seis_config("bin_rp_int", to_string(cfg.bin_rp_int));
-    update_seis_config("nb_bin_sp", to_string(cfg.nb_bin_sp));
-    update_seis_config("nb_bin_rp", to_string(cfg.nb_bin_rp));
-    update_seis_config("epsg", to_string(cfg.epsg));
-    update_seis_config("offset", to_string(cfg.offset));
-    update_seis_config("src_indexes", "0");
-    printf("config values stored in database!\n");
+void DbHandling::create_sps_x_table()
+{
+    char *error_message = 0;
+    string sql;
+    sql = ("DROP TABLE IF EXISTS sps_x;");
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+
+    sql = (
+        "CREATE TABLE sps_x ("
+        "id INTEGER PRIMARY KEY, "
+        "type VAR(1), "
+        "src_line INTEGER, "
+        "src_point INTEGER, "
+        "src_index INTEGER, "
+        "chan_start INTEGER, "
+        "chan_end INTEGER, "
+        "rcv_line INTEGER, "
+        "rcv_point_start INTEGER, "
+        "rcv_point_end INTEGER, "
+        "rcv_index INTEGER, "
+        "tb var(50)"
+        ");"
+    );
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+    else
+    {
+        printf("Table sps_x successfully added!\n");
+    }
+}
+
+void DbHandling::insert_sps_x(const vector<XStruct> &sps_x)
+{
+    string sql;
+    sqlite3_stmt *stmt;
+    sql = (
+        "INSERT INTO sps_x ( "
+        "type, src_line, src_point, src_index, chan_start, chan_end, "
+        "rcv_line, rcv_point_start, rcv_point_enc, rcv_index, tb_var) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+    );
+    sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    for (const auto &x : sps_x)
+    {
+        sqlite3_bind_text(stmt, 1, x.type.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int(stmt, 2, x.src_line);
+        sqlite3_bind_int(stmt, 3, x.src_point);
+        sqlite3_bind_int(stmt, 4, x.chan_start);
+        sqlite3_bind_int(stmt, 5, x.chan_end);
+        sqlite3_bind_int(stmt, 6, x.rcv_line);
+        sqlite3_bind_int(stmt, 7, x.rcv_point_start);
+        sqlite3_bind_int(stmt, 8, x.rcv_point_end);
+        sqlite3_bind_int(stmt, 9, x.rcv_index);
+        sqlite3_bind_int(stmt, 10, x.src_index);
+        sqlite3_bind_text(stmt, 11, x.tb.c_str(), -1, SQLITE_STATIC);
+
+        if (sqlite3_step(stmt) != SQLITE_DONE)
+        {
+            printf("Insert failed: %s\n", sqlite3_errmsg(db));
+        }
+        sqlite3_reset(stmt);
+        sqlite3_clear_bindings(stmt);
+    }
+    sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
+    sqlite3_finalize(stmt);
+    printf("X SPS successfully inserted: %'lu\n", sps_x.size());
 }
 
 void DbHandling::close_database() {

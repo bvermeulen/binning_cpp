@@ -11,20 +11,20 @@
 #include "read_parse_sps.h"
 #include "data_handling.h"
 #include "bins.h"
-#include "traces.h"
+#include "binning.h"
 
 using namespace std;
 
-Traces::Traces(
-    const ConfigStruct& config, 
+Binning::Binning(
+    const ConfigStruct& config,
     BinCalc& bincalc,
-    DbHandling& db_handle, 
-    const vector<RcvStruct>& rcv, 
-    const vector<SrcStruct>& src, 
+    DbHandling& db_handle,
+    const vector<RcvStruct>& rcv,
+    const vector<SrcStruct>& src,
     const vector<XStruct>& xrel
 ) : cfg(config), bc(bincalc), db(db_handle), rcv_sps(rcv), src_sps(src), x_sps(xrel) {}
 
-void Traces::create_traces()
+void Binning::bin_traces()
 {
     int src_line, src_point, src_index;
     int rcv_line, rcv_point, rcv_point_start, rcv_point_end, rcv_index;
@@ -42,7 +42,7 @@ void Traces::create_traces()
         src_index = x_row.src_index;
         src_indexes.insert(src_index);
         auto src_item = ranges::find_if(
-            src_sps, 
+            src_sps,
             [src_line, src_point, src_index](const SrcStruct& s)
             {return (s.line == src_line) && (s.point == src_point) && (s.p_index == src_index);}
         );
@@ -54,10 +54,10 @@ void Traces::create_traces()
         rcv_point_end = x_row.rcv_point_end;
         rcv_index = x_row.rcv_index;
         vector<RcvStruct> rcv_items;
-        ranges::copy_if(rcv_sps, back_inserter(rcv_items), 
+        ranges::copy_if(rcv_sps, back_inserter(rcv_items),
             [rcv_line, rcv_point_start, rcv_point_end, rcv_index]
-            (const RcvStruct& r) {return 
-                (r.line == rcv_line) && 
+            (const RcvStruct& r) {return
+                (r.line == rcv_line) &&
                 (r.point >= rcv_point_start) && (r.point <= rcv_point_end) &&
                 (r.p_index == rcv_index);
             }
@@ -109,6 +109,4 @@ void Traces::create_traces()
         sep = ",";
     }
     db.update_seis_config("src_indexes", src_indexes_str);
-    db.insert_traces(traces);
-    db.index_traces();
 }

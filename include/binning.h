@@ -4,7 +4,6 @@
 #include "config.h"
 #include "read_parse_sps.h"
 #include "bins.h"
-#include "traces.h"
 
 using namespace std;
 
@@ -29,19 +28,19 @@ struct TraceStruct {
     int bin_rp;
 };
 
-class Traces 
+class Binning
 {
     public:
-        Traces(
+        Binning(
             const ConfigStruct& config,
-            BinCalc& bincalc, 
-            DbHandling& db_handle, 
-            const vector<RcvStruct>& rcv, 
-            const vector<SrcStruct>& src, 
+            BinCalc& bincalc,
+            DbHandling& db_handle,
+            const vector<RcvStruct>& rcv,
+            const vector<SrcStruct>& src,
             const vector<XStruct>& xrel
         );
         vector<TraceStruct> traces;
-        void create_traces();
+        void bin_traces();
 
     private:
         const ConfigStruct& cfg;
