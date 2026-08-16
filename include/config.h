@@ -21,7 +21,6 @@ struct ConfigStruct {
     vector<int> src_indexes;
     int epsg;
     int base_linepoint;
-    int batch_size;
 };
 
 ConfigStruct read_config(string file_config);

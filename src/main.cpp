@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
     BinCalc bc(cfg);
     DbHandling db(cfg);
     CsvHandling csv(cfg);
-    Binning binning(cfg, bc, db, rcv_sps, src_sps, x_sps);
+    Binning binning(cfg, bc, db, bc.bins, rcv_sps, src_sps, x_sps);
 
     db.create_database(cfg.file_stem + ".sqlite");
     db.create_seis_config_table();

@@ -8,14 +8,14 @@ using namespace std;
 
 BinCalc::BinCalc(const ConfigStruct& config) : cfg(config) {}
 
-tuple<double, double> BinCalc::xy_rotation_clockwise(double x, double y) 
+tuple<double, double> BinCalc::xy_rotation_clockwise(double x, double y)
 {
     double x_trans = x * cos_azim + y * sin_azim;
     double y_trans = -x * sin_azim + y * cos_azim;
     return make_tuple(x_trans, y_trans);
 }
 
-tuple<double, double> BinCalc::xy_rotation_ccw(double x, double y) 
+tuple<double, double> BinCalc::xy_rotation_ccw(double x, double y)
 {
     double x_trans = x * cos_azim_ccw + y * sin_azim_ccw;
     double y_trans = -x * sin_azim_ccw + y * cos_azim_ccw;
@@ -30,7 +30,7 @@ tuple<double, double> BinCalc::calc_bin_coordinate(double src_distance, double r
     return make_tuple(x, y);
 }
 
-tuple<int, int> BinCalc::calc_bin_index(double x, double y)
+tuple<int, int> BinCalc::calc_bin_grid(double x, double y)
 {
     x -= cfg.easting_orig;
     y -= cfg.northing_orig;
@@ -45,7 +45,7 @@ int BinCalc::calc_point_index(int i, int j) {
 }
 
 void BinCalc::create_bins() {
-    for (int i=0; i < 
+    for (int i=0; i <
         cfg.nb_bin_sp; i++) {
         double src_distance = i * cfg.bin_sp_int;
         for (int j=0; j < cfg.nb_bin_rp; j++) {

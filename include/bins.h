@@ -19,10 +19,10 @@ class BinCalc
         BinCalc(const ConfigStruct& config);
         vector<BinStruct> bins;
         tuple<double, double> calc_bin_coordinate(double src_distance, double rcv_distance);
-        tuple<int, int> calc_bin_index(double x, double y);
+        tuple<int, int> calc_bin_grid(double x, double y);
         int calc_point_index(int i, int j);
         void create_bins();
-    
+
     private:
         const ConfigStruct& cfg;
         float cos_azim = cos(cfg.azimuth * DEG2RAD);

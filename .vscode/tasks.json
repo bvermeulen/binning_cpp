@@ -14,7 +14,7 @@
                 "src/read_parse_sps.cpp",
                 "src/data_handling.cpp",
                 "src/bins.cpp",
-                "src/traces.cpp",
+                "src/binning.cpp",
                 "-Iinclude",
                 "-o",
                 "${workspaceFolder}/bin/debug/binning",
