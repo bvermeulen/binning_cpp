@@ -128,8 +128,8 @@ void DbHandling::store_config()
     update_seis_config("northing_orig", to_string(cfg.bin_northing_orig));
     update_seis_config("bin_sp_int", to_string(cfg.bin_sp_int));
     update_seis_config("bin_rp_int", to_string(cfg.bin_rp_int));
-    update_seis_config("bin_bin_sp", to_string(cfg.bin_nb_sp));
-    update_seis_config("bin_bin_rp", to_string(cfg.bin_nb_rp));
+    update_seis_config("bin_nb_sp", to_string(cfg.bin_nb_sp));
+    update_seis_config("bin_nb_rp", to_string(cfg.bin_nb_rp));
     update_seis_config("rcv_easting_orig", to_string(cfg.rcv_easting_orig));
     update_seis_config("rcv_northing_orig", to_string(cfg.rcv_northing_orig));
     update_seis_config("rcv_line_orig", to_string(cfg.rcv_line_orig));
@@ -558,13 +558,13 @@ void DbHandling::insert_sps_x(const vector<XStruct> &sps_x) {
         sqlite3_bind_text(stmt, 1, x.type.c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_int(stmt, 2, x.src_line);
         sqlite3_bind_int(stmt, 3, x.src_point);
-        sqlite3_bind_int(stmt, 4, x.chan_start);
-        sqlite3_bind_int(stmt, 5, x.chan_end);
-        sqlite3_bind_int(stmt, 6, x.rcv_line);
-        sqlite3_bind_int(stmt, 7, x.rcv_point_start);
-        sqlite3_bind_int(stmt, 8, x.rcv_point_end);
-        sqlite3_bind_int(stmt, 9, x.rcv_index);
-        sqlite3_bind_int(stmt, 10, x.src_index);
+        sqlite3_bind_int(stmt, 4, x.src_index);
+        sqlite3_bind_int(stmt, 5, x.chan_start);
+        sqlite3_bind_int(stmt, 6, x.chan_end);
+        sqlite3_bind_int(stmt, 7, x.rcv_line);
+        sqlite3_bind_int(stmt, 8, x.rcv_point_start);
+        sqlite3_bind_int(stmt, 9, x.rcv_point_end);
+        sqlite3_bind_int(stmt, 10, x.rcv_index);
         sqlite3_bind_text(stmt, 11, x.tb.c_str(), -1, SQLITE_STATIC);
 
         if (sqlite3_step(stmt) != SQLITE_DONE)
