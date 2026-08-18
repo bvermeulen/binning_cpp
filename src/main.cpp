@@ -26,20 +26,28 @@ int main(int argc, char* argv[]) {
     BinCalc bc(cfg);
     DbHandling db(cfg);
     CsvHandling csv(cfg);
-    Binning binning(cfg, bc, db, bc.bins, rcv_sps, src_sps, x_sps);
+    Binning binning(cfg, bc, db, bc.bins, bc.bins_offset, rcv_sps, src_sps, x_sps);
 
     db.create_database(cfg.file_stem + ".sqlite");
     db.create_seis_config_table();
     db.store_config();
     db.create_bins_table();
+    db.create_bins_offset_table();
 
     setlocale(LC_ALL, "");
     sps::parse_rcv_sps(cfg.file_stem + ".R", rcv_sps);
+    db.create_sps_rcv_table();
+    db.insert_sps_rcv(rcv_sps);
     sps::parse_src_sps(cfg.file_stem + ".S", src_sps);
+    db.create_sps_src_table();
+    db.insert_sps_src(src_sps);
     sps::parse_x_sps(cfg.file_stem + ".X", x_sps);
+    db.create_sps_x_table();
+    db.insert_sps_x(x_sps);
     bc.create_bins();
-    printf("number of bins: %'lu\n", bc.bins.size());
+    bc.create_bins_offset();
     binning.bin_traces();
     db.insert_bins(bc.bins);
+    db.insert_bins_offset(bc.bins_offset);
     db.close_database();
 }

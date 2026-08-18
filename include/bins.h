@@ -5,11 +5,20 @@
 using namespace std;
 
 struct BinStruct {
-    int id;
+    int bin_id;
     int bin_sp;
     int bin_rp;
     double easting;
     double northing;
+    int bin_count;
+    vector<int> src_indexes;
+    int offset;
+};
+
+struct BinOffsetStruct {
+    int bin_id;
+    int offset;
+    int src_index;
     int bin_count;
 };
 
@@ -18,10 +27,12 @@ class BinCalc
     public:
         BinCalc(const ConfigStruct& config);
         vector<BinStruct> bins;
+        vector<BinOffsetStruct> bins_offset;
         tuple<double, double> calc_bin_coordinate(double src_distance, double rcv_distance);
         tuple<int, int> calc_bin_grid(double x, double y);
         int calc_point_index(int i, int j);
         void create_bins();
+        void create_bins_offset();
 
     private:
         const ConfigStruct& cfg;

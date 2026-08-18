@@ -19,13 +19,13 @@ void CsvHandling::save_bins_csv(string filename, const vector<BinStruct>& bins) 
     line = "id, bin_sp, bin_rp, easting, northing, bin_count\n";
     outfile << line;
     for (BinStruct bin : bins) {
-        string id = to_string(bin.id) + ", ";
+        string bin_id = to_string(bin.bin_id) + ", ";
         string sp = to_string(bin.bin_sp) + ", ";
         string rp = to_string(bin.bin_rp) + ", ";
         string e = to_string(bin.easting) + ", ";
         string n = to_string(bin.northing) + ", ";
         string bc = to_string(bin.bin_count) + "\n";
-        line = id + sp + rp + e + n + bc;
+        line = bin_id + sp + rp + e + n + bc;
         outfile << line;
     }
     outfile.close();
@@ -108,6 +108,17 @@ void DbHandling::update_seis_config(string key, string value)
     sqlite3_finalize(stmt);
 }
 
+string DbHandling::vector_to_string(const vector<int>& intvector) {
+    string sep = "";
+    string vector_str;
+    for (const auto &element : intvector)
+    {
+        vector_str += sep + to_string(element);
+        sep = ",";
+    }
+    return vector_str;
+}
+
 void DbHandling::store_config()
 {
     update_seis_config("file_stem", cfg.file_stem);
@@ -119,9 +130,23 @@ void DbHandling::store_config()
     update_seis_config("bin_rp_int", to_string(cfg.bin_rp_int));
     update_seis_config("nb_bin_sp", to_string(cfg.nb_bin_sp));
     update_seis_config("nb_bin_rp", to_string(cfg.nb_bin_rp));
-    update_seis_config("epsg", to_string(cfg.epsg));
+    update_seis_config("rcv_easting_orig", to_string(cfg.rcv_easting_orig));
+    update_seis_config("rcv_northing_orig", to_string(cfg.rcv_northing_orig));
+    update_seis_config("rcv_line_orig", to_string(cfg.rcv_line_orig));
+    update_seis_config("rcv_point_orig", to_string(cfg.rcv_point_orig));
+    update_seis_config("rl_int", to_string(cfg.rl_int));
+    update_seis_config("rp_int", to_string(cfg.rp_int));
+    update_seis_config("src_easting_orig", to_string(cfg.src_easting_orig));
+    update_seis_config("src_northing_orig", to_string(cfg.src_northing_orig));
+    update_seis_config("src_line_orig", to_string(cfg.src_line_orig));
+    update_seis_config("src_point_orig", to_string(cfg.src_point_orig));
+    update_seis_config("sl_int", to_string(cfg.sl_int));
+    update_seis_config("sp_int", to_string(cfg.sp_int));
     update_seis_config("offset", to_string(cfg.offset));
-    update_seis_config("src_indexes", "0");
+    update_seis_config("offset_range", vector_to_string(cfg.offset_range));
+    update_seis_config("src_indexes", vector_to_string(cfg.src_indexes));
+    update_seis_config("epsg", to_string(cfg.epsg));
+    update_seis_config("base_linepoint", to_string(cfg.base_linepoint));
     printf("config values stored in database!\n");
 }
 
@@ -141,11 +166,14 @@ void DbHandling::create_bins_table() {
     sql = (
         "CREATE TABLE bins ("
         "id INTEGER PRIMARY KEY, "
+        "bin_id INTEGER, "
         "bin_sp INTEGER, "
         "bin_rp INTEGER, "
         "easting DOUBLE PRECISION, "
         "northing DOUBLE PRECISION, "
-        "bin_count INT "
+        "bin_count INTEGER, "
+        "offset INTERGER, "
+        "src_indexes TEXT"
         ");"
     );
     if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK) {
@@ -176,26 +204,32 @@ void DbHandling::insert_bins(const vector<BinStruct>& bins) {
     sqlite3_stmt* stmt;
     sql = (
         "INSERT INTO bins ( "
-        "bin_sp, bin_rp, easting, northing, bin_count, geom) "
-        "VALUES (?, ?, ?, ?, ?, MakePoint(?, ?, ?) "
+        "bin_id, bin_sp, bin_rp, easting, northing, bin_count, "
+        "offset, src_indexes, geom) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, MakePoint(?, ?, ?) "
         ");"
     );
     sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
     sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
     for (const auto& bin : bins) {
-        sqlite3_bind_int(stmt, 1, bin.bin_sp);
-        sqlite3_bind_int(stmt, 2, bin.bin_rp);
-        sqlite3_bind_double(stmt, 3, bin.easting);
-        sqlite3_bind_double(stmt, 4, bin.northing);
+        sqlite3_bind_int(stmt, 1, bin.bin_id);
+        sqlite3_bind_int(stmt, 2, bin.bin_sp);
+        sqlite3_bind_int(stmt, 3, bin.bin_rp);
+        sqlite3_bind_double(stmt, 4, bin.easting);
+        sqlite3_bind_double(stmt, 5, bin.northing);
         if (bin.bin_count > 0) {
-            sqlite3_bind_int(stmt, 5, bin.bin_count);
+            sqlite3_bind_int(stmt, 6, bin.bin_count);
+            sqlite3_bind_int(stmt, 7, bin.offset);
+            sqlite3_bind_text(stmt, 8, vector_to_string(bin.src_indexes).c_str(), -1, SQLITE_STATIC);
         }
         else {
-            sqlite3_bind_null(stmt, 5);
+            sqlite3_bind_null(stmt, 6);
+            sqlite3_bind_null(stmt, 7);
+            sqlite3_bind_null(stmt, 8);
         }
-        sqlite3_bind_double(stmt, 6, bin.easting);
-        sqlite3_bind_double(stmt, 7, bin.northing);
-        sqlite3_bind_int(stmt, 8, cfg.epsg);
+        sqlite3_bind_double(stmt, 9, bin.easting);
+        sqlite3_bind_double(stmt, 10, bin.northing);
+        sqlite3_bind_int(stmt, 11, cfg.epsg);
 
         if (sqlite3_step(stmt) != SQLITE_DONE) {
             printf("Insert failed: %s\n", sqlite3_errmsg(db));
@@ -206,6 +240,79 @@ void DbHandling::insert_bins(const vector<BinStruct>& bins) {
     sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
     printf("Bins successfully inserted: %'lu\n", bins.size());
+}
+
+void DbHandling::create_bins_offset_table()
+{
+    char *error_message = 0;
+    string sql;
+    sql = ("DROP TABLE IF EXISTS bins_offset;");
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+
+    sql = (
+        "CREATE TABLE bins_offset ("
+        "id INTEGER PRIMARY KEY, "
+        "bin_id INTEGER, "
+        "offset INTEGER, "
+        "src_index INTEGER, "
+        "bin_count INTEGER "
+        ");"
+    );
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+    else
+    {
+        printf("Table bins_offset successfully added!\n");
+    }
+}
+
+void DbHandling::insert_bins_offset(const vector<BinOffsetStruct> &bins_offset)
+{
+    string sql;
+    sqlite3_stmt *stmt;
+    sql = ("INSERT INTO bins_offset ( "
+           "bin_id, offset, src_index, bin_count) "
+           "VALUES (?, ?, ?, ?);");
+    sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    for (const auto &bo : bins_offset)
+    {
+        sqlite3_bind_int(stmt, 1, bo.bin_id);
+        sqlite3_bind_int(stmt, 2, bo.offset);
+        if (bo.src_index > 0){
+            sqlite3_bind_int(stmt, 3, bo.src_index);
+        }
+        else {
+            sqlite3_bind_null(stmt, 3);
+        }
+        if (bo.bin_count > 0) {
+            sqlite3_bind_int(stmt, 4, bo.bin_count);
+        }
+        else {
+            sqlite3_bind_null(stmt, 4);
+        }
+
+        if (sqlite3_step(stmt) != SQLITE_DONE)
+        {
+            printf("Insert failed: %s\n", sqlite3_errmsg(db));
+        }
+        sqlite3_reset(stmt);
+        sqlite3_clear_bindings(stmt);
+    }
+    sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
+    sqlite3_finalize(stmt);
+    printf("Bins offset successfully inserted: %'lu\n", bins_offset.size());
 }
 
 void DbHandling::create_sps_rcv_table()
@@ -403,7 +510,7 @@ void DbHandling::insert_sps_x(const vector<XStruct> &sps_x)
     sql = (
         "INSERT INTO sps_x ( "
         "type, src_line, src_point, src_index, chan_start, chan_end, "
-        "rcv_line, rcv_point_start, rcv_point_enc, rcv_index, tb_var) "
+        "rcv_line, rcv_point_start, rcv_point_end, rcv_index, tb) "
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
     sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);

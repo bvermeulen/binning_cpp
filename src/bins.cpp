@@ -52,13 +52,35 @@ void BinCalc::create_bins() {
             double rcv_distance = j * cfg.bin_rp_int;
             auto coord = calc_bin_coordinate(src_distance, rcv_distance);
             BinStruct bin;
-            bin.id = calc_point_index(i, j);
+            bin.bin_id = calc_point_index(i, j);
             bin.bin_sp = i;
             bin.bin_rp = j;
             bin.easting = get<0>(coord);
             bin.northing = get<1>(coord);
             bin.bin_count = 0;
+            bin.offset = 0;
+            bin.src_indexes = vector<int> {};
             bins.push_back(bin);
         }
     }
+    printf("number of bins: %'lu\n", bins.size());
+}
+
+void BinCalc::create_bins_offset() {
+    for (int i = 0; i < cfg.nb_bin_sp; i++) {
+        for (int j = 0; j < cfg.nb_bin_rp; j++) {
+            int bin_id = calc_point_index(i, j);
+            for (auto si : cfg.src_indexes) {
+                for (int ofr = cfg.offset_range[0]; ofr <= cfg.offset_range[1]; ofr += cfg.offset_range[2]) {
+                    BinOffsetStruct bin;
+                    bin.bin_id = bin_id;
+                    bin.offset = ofr;
+                    bin.src_index = si;
+                    bin.bin_count = 0;
+                    bins_offset.push_back(bin);
+                }
+            }
+        }
+    }
+    printf("number of bins offset: %'lu\n", bins_offset.size());
 }

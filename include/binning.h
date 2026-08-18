@@ -11,23 +11,6 @@ using namespace std;
 class DbHandling;
 class CsvHamdling;
 
-// struct TraceStruct {
-//     int src_line;
-//     int src_point;
-//     int src_index;
-//     string src_code;
-//     int rcv_line;
-//     int rcv_point;
-//     int rcv_index;
-//     string rcv_code;
-//     double mid_point_x;
-//     double mid_point_y;
-//     float offset;
-//     float azimuth;
-//     int bin_sp;
-//     int bin_rp;
-// };
-
 class Binning
 {
     public:
@@ -36,6 +19,7 @@ class Binning
             BinCalc &bincalc,
             DbHandling &db_handle,
             vector<BinStruct> &bins_vector,
+            vector<BinOffsetStruct> &bo_vector,
             const vector<RcvStruct> &rcv,
             const vector<SrcStruct> &src,
             const vector<XStruct> &xrel
@@ -46,10 +30,12 @@ class Binning
         const ConfigStruct& cfg;
         BinCalc& bc;
         DbHandling& db;
-        vector <BinStruct>& bins;
+        vector<BinStruct>& bins;
+        vector<BinOffsetStruct>& bins_offset;
         const vector<RcvStruct>& rcv_sps;
         const vector<SrcStruct>& src_sps;
         const vector<XStruct>& x_sps;
+        void update_bin_offset(int bin_id, int src_index, float offset);
 };
 
 #endif // BINNING_H
