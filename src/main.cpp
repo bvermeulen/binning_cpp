@@ -49,5 +49,6 @@ int main(int argc, char* argv[]) {
     binning.bin_traces();
     db.insert_bins(bc.bins);
     db.insert_bins_offset(bc.bins_offset);
+    db.create_traces_table();
     db.close_database();
 }

@@ -36,6 +36,7 @@ class DbHandling
         void insert_bins(const vector<BinStruct>& bins);
         void create_bins_offset_table();
         void insert_bins_offset(const vector<BinOffsetStruct>& bins_offset);
+        void create_traces_table();
         void create_sps_rcv_table();
         void insert_sps_rcv(const vector<RcvStruct>& rcv_sps);
         void create_sps_src_table();

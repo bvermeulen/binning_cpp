@@ -123,13 +123,13 @@ void DbHandling::store_config()
 {
     update_seis_config("file_stem", cfg.file_stem);
     update_seis_config("azimuth", to_string(cfg.azimuth));
-    update_seis_config("easting_orig", to_string(cfg.easting_orig));
-    update_seis_config("northing_orig", to_string(cfg.northing_orig));
-    update_seis_config("northing_orig", to_string(cfg.northing_orig));
+    update_seis_config("bin_easting_orig", to_string(cfg.bin_easting_orig));
+    update_seis_config("bin_northing_orig", to_string(cfg.bin_northing_orig));
+    update_seis_config("northing_orig", to_string(cfg.bin_northing_orig));
     update_seis_config("bin_sp_int", to_string(cfg.bin_sp_int));
     update_seis_config("bin_rp_int", to_string(cfg.bin_rp_int));
-    update_seis_config("nb_bin_sp", to_string(cfg.nb_bin_sp));
-    update_seis_config("nb_bin_rp", to_string(cfg.nb_bin_rp));
+    update_seis_config("bin_bin_sp", to_string(cfg.bin_nb_sp));
+    update_seis_config("bin_bin_rp", to_string(cfg.bin_nb_rp));
     update_seis_config("rcv_easting_orig", to_string(cfg.rcv_easting_orig));
     update_seis_config("rcv_northing_orig", to_string(cfg.rcv_northing_orig));
     update_seis_config("rcv_line_orig", to_string(cfg.rcv_line_orig));
@@ -315,8 +315,51 @@ void DbHandling::insert_bins_offset(const vector<BinOffsetStruct> &bins_offset)
     printf("Bins offset successfully inserted: %'lu\n", bins_offset.size());
 }
 
-void DbHandling::create_sps_rcv_table()
-{
+void DbHandling::create_traces_table() {
+    char *error_message = 0;
+    string sql;
+    sql = ("DROP TABLE IF EXISTS traces;");
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+    sql = (
+        "CREATE TABLE traces ("
+        "id INTEGER PRIMARY KEY, "
+        "src_line REAL, "
+        "src_point REAL, "
+        "src_index INTEGER, "
+        "src_code VAR(2), "
+        "rcv_line REAL, "
+        "rcv_point REAL, "
+        "rcv_index INTEGER, "
+        "rcv_code VAR(2), "
+        "mid_point_x DOUBLE PRECISION, "
+        "mid_point_y DOUBLE PRECISION, "
+        "offset REAL, "
+        "azimuth REAL, "
+        "bin_sp INTEGER, "
+        "bin_rp INTEGER "
+        ");"
+    );
+
+    if (sqlite3_exec(db, sql.c_str(), NULL, 0, &error_message) != SQLITE_OK)
+    {
+        printf("SQL error: %s\n", error_message);
+        sqlite3_free(error_message);
+        sqlite3_close(db);
+        exit(0);
+    }
+    else
+    {
+        printf("Table traces successfully added!\n");
+    }
+}
+
+void DbHandling::create_sps_rcv_table() {
     char *error_message = 0;
     string sql;
     sql = ("DROP TABLE IF EXISTS sps_rcv;");
@@ -354,8 +397,7 @@ void DbHandling::create_sps_rcv_table()
     }
 }
 
-void DbHandling::insert_sps_rcv(const vector<RcvStruct> &sps_rcv)
-{
+void DbHandling::insert_sps_rcv(const vector<RcvStruct> &sps_rcv) {
     string sql;
     sqlite3_stmt *stmt;
     sql = (
@@ -388,8 +430,7 @@ void DbHandling::insert_sps_rcv(const vector<RcvStruct> &sps_rcv)
     printf("Receiver SPS successfully inserted: %'lu\n", sps_rcv.size());
 }
 
-void DbHandling::create_sps_src_table()
-{
+void DbHandling::create_sps_src_table() {
     char *error_message = 0;
     string sql;
     sql = ("DROP TABLE IF EXISTS sps_src;");
@@ -427,8 +468,7 @@ void DbHandling::create_sps_src_table()
     }
 }
 
-void DbHandling::insert_sps_src(const vector<SrcStruct> &sps_src)
-{
+void DbHandling::insert_sps_src(const vector<SrcStruct> &sps_src) {
     string sql;
     sqlite3_stmt *stmt;
     sql = (
@@ -461,8 +501,7 @@ void DbHandling::insert_sps_src(const vector<SrcStruct> &sps_src)
     printf("Receiver SPS successfully inserted: %'lu\n", sps_src.size());
 }
 
-void DbHandling::create_sps_x_table()
-{
+void DbHandling::create_sps_x_table() {
     char *error_message = 0;
     string sql;
     sql = ("DROP TABLE IF EXISTS sps_x;");
@@ -503,8 +542,7 @@ void DbHandling::create_sps_x_table()
     }
 }
 
-void DbHandling::insert_sps_x(const vector<XStruct> &sps_x)
-{
+void DbHandling::insert_sps_x(const vector<XStruct> &sps_x) {
     string sql;
     sqlite3_stmt *stmt;
     sql = (

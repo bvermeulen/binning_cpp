@@ -13,10 +13,10 @@ ConfigStruct read_config(string file_config) {
         azimuth, offset, bin_sp_int, bin_rp_int,
         rl_int, rp_int, sl_int, sp_int;
     double
-        easting_orig, northing_orig, rcv_easting_orig,
+        bin_easting_orig, bin_northing_orig, rcv_easting_orig,
         rcv_northing_orig, src_easting_orig, src_northing_orig;
     int
-        nb_bin_sp, nb_bin_rp,
+        bin_nb_sp, bin_nb_rp,
         rcv_line_orig, rcv_point_orig, src_line_orig, src_point_orig,
         epsg, base_linepoint;
     vector<int> src_indexes;
@@ -36,12 +36,12 @@ ConfigStruct read_config(string file_config) {
 
         file_stem = boost::json::value_to<string>(obj.at("file_stem"));
         azimuth = boost::json::value_to<float>(obj.at("azimuth"));
-        easting_orig = boost::json::value_to<double>(obj.at("easting_orig"));
-        northing_orig = boost::json::value_to<double>(obj.at("northing_orig"));
+        bin_easting_orig = boost::json::value_to<double>(obj.at("bin_easting_orig"));
+        bin_northing_orig = boost::json::value_to<double>(obj.at("bin_northing_orig"));
         bin_sp_int = boost::json::value_to<float>(obj.at("bin_sp_int"));
         bin_rp_int = boost::json::value_to<float>(obj.at("bin_rp_int"));
-        nb_bin_sp = boost::json::value_to<int>(obj.at("nb_bin_sp"));
-        nb_bin_rp = boost::json::value_to<int>(obj.at("nb_bin_rp"));
+        bin_nb_sp = boost::json::value_to<int>(obj.at("bin_nb_sp"));
+        bin_nb_rp = boost::json::value_to<int>(obj.at("bin_nb_rp"));
 
         rcv_easting_orig = boost::json::value_to<double>(obj.at("rcv_easting_orig"));
         rcv_northing_orig = boost::json::value_to<double>(obj.at("rcv_northing_orig"));
@@ -70,10 +70,10 @@ ConfigStruct read_config(string file_config) {
     ConfigStruct cfg;
     cfg.file_stem = file_stem;
     cfg.azimuth = azimuth;
-    cfg.easting_orig = easting_orig;
-    cfg.northing_orig = northing_orig;
-    cfg.nb_bin_sp = nb_bin_sp;
-    cfg.nb_bin_rp = nb_bin_rp;
+    cfg.bin_easting_orig = bin_easting_orig;
+    cfg.bin_northing_orig = bin_northing_orig;
+    cfg.bin_nb_sp = bin_nb_sp;
+    cfg.bin_nb_rp = bin_nb_rp;
     cfg.bin_sp_int = bin_sp_int;
     cfg.bin_rp_int = bin_rp_int;
     cfg.rcv_easting_orig = rcv_easting_orig;

@@ -10,10 +10,10 @@ const float RAD2DEG = 180 / acos(-1.0);
 struct ConfigStruct {
     string file_stem;
     float azimuth;
-    double easting_orig;
-    double northing_orig;
-    int nb_bin_sp;
-    int nb_bin_rp;
+    double bin_easting_orig;
+    double bin_northing_orig;
+    int bin_nb_sp;
+    int bin_nb_rp;
     float bin_sp_int;
     float bin_rp_int;
     double rcv_easting_orig;

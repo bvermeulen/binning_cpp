@@ -69,7 +69,7 @@ void Binning::bin_traces()
             auto val = bc.calc_bin_grid(mid_point_x, mid_point_y);
             src_bin = get<0>(val);
             rcv_bin = get<1>(val);
-            if (src_bin > cfg.nb_bin_sp || rcv_bin > cfg.nb_bin_rp) continue;
+            if (src_bin > cfg.bin_nb_sp || rcv_bin > cfg.bin_nb_rp) continue;
             dx = src_easting - rcv_item.easting;
             dy = src_northing - rcv_item.northing;
             offset = sqrt(dx*dx + dy*dy);
