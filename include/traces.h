@@ -1,5 +1,5 @@
-#ifndef BINNING_H
-#define BINNING_H
+#ifndef TRACES_H
+#define TRACES_H
 #include <cmath>
 #include "config.h"
 #include "read_parse_sps.h"

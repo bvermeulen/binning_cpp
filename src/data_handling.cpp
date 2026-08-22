@@ -5,7 +5,7 @@
 #include <sqlite3.h>
 #include "config.h"
 #include "bins.h"
-#include "binning.h"
+#include "traces.h"
 #include "data_handling.h"
 
 using namespace std;
@@ -239,7 +239,7 @@ void DbHandling::insert_bins(const vector<BinStruct>& bins) {
     }
     sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
-    printf("Bins successfully inserted: %'lu\n", bins.size());
+    printf("Bins successfully inserted: %'llu\n", bins.size());
 }
 
 void DbHandling::create_bins_offset_table()
@@ -312,7 +312,7 @@ void DbHandling::insert_bins_offset(const vector<BinOffsetStruct> &bins_offset)
     }
     sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
-    printf("Bins offset successfully inserted: %'lu\n", bins_offset.size());
+    printf("Bins offset successfully inserted: %'llu\n", bins_offset.size());
 }
 
 void DbHandling::create_traces_table() {
@@ -427,7 +427,7 @@ void DbHandling::insert_sps_rcv(const vector<RcvStruct> &sps_rcv) {
     }
     sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
-    printf("Receiver SPS successfully inserted: %'lu\n", sps_rcv.size());
+    printf("Receiver SPS successfully inserted: %'llu\n", sps_rcv.size());
 }
 
 void DbHandling::create_sps_src_table() {
@@ -498,7 +498,7 @@ void DbHandling::insert_sps_src(const vector<SrcStruct> &sps_src) {
     }
     sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
-    printf("Receiver SPS successfully inserted: %'lu\n", sps_src.size());
+    printf("Receiver SPS successfully inserted: %'llu\n", sps_src.size());
 }
 
 void DbHandling::create_sps_x_table() {
@@ -576,7 +576,7 @@ void DbHandling::insert_sps_x(const vector<XStruct> &sps_x) {
     }
     sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     sqlite3_finalize(stmt);
-    printf("X SPS successfully inserted: %'lu\n", sps_x.size());
+    printf("X SPS successfully inserted: %'llu\n", sps_x.size());
 }
 
 void DbHandling::close_database() {

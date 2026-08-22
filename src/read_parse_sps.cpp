@@ -40,7 +40,7 @@ namespace sps {
             rcv_sps_vector.push_back(rcv_sps);
         }
         file.close();
-        printf("SPS R records: %'lu\n", rcv_sps_vector.size());
+        printf("SPS R records: %'llu\n", rcv_sps_vector.size());
     }
 
     void parse_src_sps(string filename, vector<SrcStruct>& src_sps_vector)
@@ -73,7 +73,7 @@ namespace sps {
             src_sps_vector.push_back(src_sps);
         }
         file.close();
-        printf("SPS S records: %'lu\n", src_sps_vector.size());
+        printf("SPS S records: %'llu\n", src_sps_vector.size());
     }
 
     void parse_x_sps(string filename, vector<XStruct>& x_sps_vector)
@@ -104,7 +104,7 @@ namespace sps {
             x_sps_vector.push_back(x_sps);
         }
         file.close();
-        printf("SPS X records: %'lu\n", x_sps_vector.size());
+        printf("SPS X records: %'llu\n", x_sps_vector.size());
     }
 }
 

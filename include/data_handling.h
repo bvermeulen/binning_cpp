@@ -2,7 +2,7 @@
 #define DATA_HANDLING_H
 #include <sqlite3.h>
 #include "config.h"
-#include "binning.h"
+#include "traces.h"
 #include "bins.h"
 #include "read_parse_sps.h"
 

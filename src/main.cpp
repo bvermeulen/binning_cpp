@@ -5,7 +5,7 @@
 #include "config.h"
 #include "read_parse_sps.h"
 #include "bins.h"
-#include "binning.h"
+#include "traces.h"
 #include "data_handling.h"
 
 using namespace std;

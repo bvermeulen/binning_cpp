@@ -63,7 +63,7 @@ void BinCalc::create_bins() {
             bins.push_back(bin);
         }
     }
-    printf("number of bins: %'lu\n", bins.size());
+    printf("number of bins: %'llu\n", bins.size());
 }
 
 void BinCalc::create_bins_offset() {
@@ -82,5 +82,5 @@ void BinCalc::create_bins_offset() {
             }
         }
     }
-    printf("number of bins offset: %'lu\n", bins_offset.size());
+    printf("number of bins offset: %'llu\n", bins_offset.size());
 }
