@@ -9,8 +9,8 @@ using namespace std;
 
 namespace sps {
 
-    
-    void parse_rcv_sps(string filename, vector<RcvStruct>& rcv_sps_vector) 
+
+    void parse_rcv_sps(string filename, vector<RcvStruct>& rcv_sps_vector)
     {
         ifstream file(filename);
 
@@ -19,12 +19,12 @@ namespace sps {
             exit(0);
         }
         string line;
-        
+
         while (getline(file, line)) {
             string p_code = line.substr(24,2);
             if (p_code == "KL") continue;
             string elevation = line.substr(65, 10);
-            float elev = all_of(elevation.begin(), elevation.end(), [](unsigned char c) { 
+            float elev = all_of(elevation.begin(), elevation.end(), [](unsigned char c) {
                 return std::isspace(c);}) ? 0.0 : stof(elevation);
 
             RcvStruct rcv_sps;
@@ -40,10 +40,10 @@ namespace sps {
             rcv_sps_vector.push_back(rcv_sps);
         }
         file.close();
-        printf("SPS R records: %'lld\n", rcv_sps_vector.size());
+        printf("SPS R records: %'lu\n", rcv_sps_vector.size());
     }
 
-    void parse_src_sps(string filename, vector<SrcStruct>& src_sps_vector) 
+    void parse_src_sps(string filename, vector<SrcStruct>& src_sps_vector)
     {
         ifstream file(filename);
 
@@ -52,12 +52,12 @@ namespace sps {
             exit(0);
         }
         string line;
-        
+
         while (getline(file, line)) {
             string p_code = line.substr(24,2);
             if (p_code == "KL") continue;
             string elevation = line.substr(65, 10);
-            float elev = all_of(elevation.begin(), elevation.end(), [](unsigned char c) { 
+            float elev = all_of(elevation.begin(), elevation.end(), [](unsigned char c) {
                 return std::isspace(c);}) ? 0.0 : stof(elevation);
 
             SrcStruct src_sps;
@@ -73,10 +73,10 @@ namespace sps {
             src_sps_vector.push_back(src_sps);
         }
         file.close();
-        printf("SPS S records: %'lld\n", src_sps_vector.size());
+        printf("SPS S records: %'lu\n", src_sps_vector.size());
     }
 
-    void parse_x_sps(string filename, vector<XStruct>& x_sps_vector) 
+    void parse_x_sps(string filename, vector<XStruct>& x_sps_vector)
     {
         ifstream file(filename);
 
@@ -85,7 +85,7 @@ namespace sps {
             exit(0);
         }
         string line;
-        
+
         while (getline(file, line)) {
             XStruct x_sps;
             x_sps.type = line.substr(0,1);
@@ -104,7 +104,7 @@ namespace sps {
             x_sps_vector.push_back(x_sps);
         }
         file.close();
-        printf("SPS X records: %'lld\n", x_sps_vector.size());
+        printf("SPS X records: %'lu\n", x_sps_vector.size());
     }
 }
 

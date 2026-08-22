@@ -6,22 +6,33 @@ using namespace std;
 
 const float DEG2RAD = acos(-1.0) / 180.0;
 const float RAD2DEG = 180 / acos(-1.0);
-const int BASE_LINEPOINT = 10'000;
 
 struct ConfigStruct {
     string file_stem;
     float azimuth;
-    double easting_orig;
-    double northing_orig;
-    int nb_bin_sp;
-    int nb_bin_rp;
-    double bin_sp_int;
-    double bin_rp_int;
+    double bin_easting_orig;
+    double bin_northing_orig;
+    int bin_nb_sp;
+    int bin_nb_rp;
+    float bin_sp_int;
+    float bin_rp_int;
+    double rcv_easting_orig;
+    double rcv_northing_orig;
+    int rcv_line_orig;
+    int rcv_point_orig;
+    float rl_int;
+    float rp_int;
+    double src_easting_orig;
+    double src_northing_orig;
+    int src_line_orig;
+    int src_point_orig;
+    float sl_int;
+    float sp_int;
     float offset;
+    vector<int> offset_range;
     vector<int> src_indexes;
     int epsg;
     int base_linepoint;
-    int batch_size;
 };
 
 ConfigStruct read_config(string file_config);

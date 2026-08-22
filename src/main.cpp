@@ -5,13 +5,12 @@
 #include "config.h"
 #include "read_parse_sps.h"
 #include "bins.h"
-#include "traces.h"
+#include "binning.h"
 #include "data_handling.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    setlocale(LC_ALL, "");
     string config_file;
     if (argc == 2) {
         config_file = argv[1];
@@ -27,21 +26,29 @@ int main(int argc, char* argv[]) {
     BinCalc bc(cfg);
     DbHandling db(cfg);
     CsvHandling csv(cfg);
-    Traces trc(cfg, bc, db, rcv_sps, src_sps, x_sps);
-    
-    sps::parse_rcv_sps(cfg.file_stem + ".R", rcv_sps);
-    sps::parse_src_sps(cfg.file_stem + ".S", src_sps);
-    sps::parse_x_sps(cfg.file_stem + ".X", x_sps);
-    
+    Binning binning(cfg, bc, db, bc.bins, bc.bins_offset, rcv_sps, src_sps, x_sps);
+
     db.create_database(cfg.file_stem + ".sqlite");
     db.create_seis_config_table();
     db.store_config();
     db.create_bins_table();
-    db.create_traces_table();
+    db.create_bins_offset_table();
+
+    setlocale(LC_ALL, "");
+    sps::parse_rcv_sps(cfg.file_stem + ".R", rcv_sps);
+    db.create_sps_rcv_table();
+    db.insert_sps_rcv(rcv_sps);
+    sps::parse_src_sps(cfg.file_stem + ".S", src_sps);
+    db.create_sps_src_table();
+    db.insert_sps_src(src_sps);
+    sps::parse_x_sps(cfg.file_stem + ".X", x_sps);
+    db.create_sps_x_table();
+    db.insert_sps_x(x_sps);
     bc.create_bins();
-    printf("number of bins: %'lld\n", bc.bins.size());
-    trc.create_traces();
-    csv.save_bins_csv(cfg.file_stem + ".csv", bc.bins);
+    bc.create_bins_offset();
+    binning.bin_traces();
     db.insert_bins(bc.bins);
+    db.insert_bins_offset(bc.bins_offset);
+    db.create_traces_table();
     db.close_database();
 }
