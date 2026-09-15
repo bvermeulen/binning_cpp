@@ -21,6 +21,7 @@ namespace sps {
         string line;
 
         while (getline(file, line)) {
+            if (line.substr(0,1) != "R") continue;
             string p_code = line.substr(24,2);
             if (p_code == "KL") continue;
             string elevation = line.substr(65, 10);
@@ -33,7 +34,7 @@ namespace sps {
             rcv_sps.point = stoi(line.substr(11,10));
             rcv_sps.p_index = stoi(line.substr(21,3));
             rcv_sps.p_code = p_code;
-            rcv_sps.easting = stof(line.substr(45,10));
+            rcv_sps.easting = stof(line.substr(46,9));
             rcv_sps.northing = stof(line.substr(55,10));
             rcv_sps.elevation = elev;
 
@@ -54,6 +55,7 @@ namespace sps {
         string line;
 
         while (getline(file, line)) {
+            if (line.substr(0,1) != "S") continue;
             string p_code = line.substr(24,2);
             if (p_code == "KL") continue;
             string elevation = line.substr(65, 10);
@@ -66,7 +68,7 @@ namespace sps {
             src_sps.point = stoi(line.substr(11,10));
             src_sps.p_index = stoi(line.substr(21,3));
             src_sps.p_code = p_code;
-            src_sps.easting = stof(line.substr(45,10));
+            src_sps.easting = stof(line.substr(46,9));
             src_sps.northing = stof(line.substr(55,10));
             src_sps.elevation = elev;
 
@@ -87,6 +89,7 @@ namespace sps {
         string line;
 
         while (getline(file, line)) {
+            if (line.substr(0,1) != "X") continue;
             XStruct x_sps;
             x_sps.type = line.substr(0,1);
             x_sps.src_line = stoi(line.substr(17,10));

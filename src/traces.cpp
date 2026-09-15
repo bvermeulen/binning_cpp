@@ -88,7 +88,7 @@ void Binning::bin_traces()
                     }
                     bin_item->bin_count++;
                 }
-                if (trace_count % 1000000 == 0) printf("Trace count: %'11d: \n", trace_count);
+                if (trace_count % 1000000 == 0) printf("Trace count: %'11d\n", trace_count);
                 trace_count++;
             }
         }
